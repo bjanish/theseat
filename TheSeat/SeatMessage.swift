@@ -1,0 +1,11 @@
+import Foundation
+
+enum SeatMessage: Codable, Sendable {
+    case join(name: String, deviceID: String)
+    case question(text: String)
+    case currentQuestion(text: String)
+    case passTheSeat(toName: String)
+    case youAreHost
+    case sessionEnd
+    case heartbeat
+}

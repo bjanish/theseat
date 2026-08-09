@@ -1,0 +1,141 @@
+import SwiftUI
+
+struct PlayerView: View {
+    @Environment(SessionManager.self) private var sessionManager
+    @State private var questionText = ""
+    @State private var hasAsked = false
+    @FocusState private var isInputFocused: Bool
+
+    private let characterLimit = 150
+    private let gold = Color(red: 0.85, green: 0.70, blue: 0.40)
+
+    var body: some View {
+        ZStack {
+            Color(white: 0.12)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Top bar
+                topBar
+
+                Spacer()
+
+                // Current question display (shared screen moment)
+                if let currentQuestion = sessionManager.currentDisplayedQuestion {
+                    sharedQuestion(currentQuestion)
+                }
+
+                Spacer()
+
+                // Input area or confirmation
+                if hasAsked {
+                    sentConfirmation
+                } else {
+                    inputArea
+                }
+            }
+        }
+        .onAppear {
+            hasAsked = false
+        }
+    }
+
+    // MARK: - Top Bar
+
+    private var topBar: some View {
+        HStack {
+            Spacer()
+
+            Button("Leave") {
+                sessionManager.leaveSession()
+            }
+            .font(.subheadline)
+            .foregroundStyle(.red.opacity(0.8))
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 12)
+    }
+
+    // MARK: - Shared Question
+
+    private func sharedQuestion(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 24, weight: .medium))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 30)
+    }
+
+    // MARK: - Sent Confirmation
+
+    private var sentConfirmation: some View {
+        Text("Your question is in")
+            .font(.title3)
+            .foregroundStyle(gold.opacity(0.7))
+            .padding(.bottom, 40)
+    }
+
+    // MARK: - Input Area
+
+    private var inputArea: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                TextField("Ask anything...", text: $questionText, axis: .vertical)
+                    .lineLimit(1...3)
+                    .textInputAutocapitalization(.sentences)
+                    .focused($isInputFocused)
+                    .onChange(of: questionText) { _, newValue in
+                        if newValue.count > characterLimit {
+                            questionText = String(newValue.prefix(characterLimit))
+                        }
+                    }
+                    .padding(.vertical, 8)
+                    .background(Color.clear)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundStyle(gold.opacity(0.6))
+                        , alignment: .bottom
+                    )
+
+                Button {
+                    sendQuestion()
+                } label: {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(questionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : gold)
+                }
+                .disabled(questionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+
+            // Character counter
+            HStack {
+                Spacer()
+                Text("\(characterLimit - questionText.count)")
+                    .font(.caption)
+                    .foregroundStyle(questionText.count > characterLimit - 20 ? gold : .white.opacity(0.3))
+            }
+        }
+        .padding(.horizontal)
+        .padding(.bottom, 8)
+    }
+
+    // MARK: - Actions
+
+    private func sendQuestion() {
+        let trimmed = questionText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        sessionManager.sendQuestion(trimmed)
+        questionText = ""
+        hasAsked = true
+
+        // Light haptic
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+}
+
+#Preview {
+    PlayerView()
+        .environment(SessionManager())
+}

@@ -1,0 +1,33 @@
+# Xcode
+build/
+DerivedData/
+*.xcworkspace
+!default.xcworkspace
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.pins
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# Misc
+*.DS_Store
+*.swp
+*.lock
+profile
+*.profraw
+Carthage/Build
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
