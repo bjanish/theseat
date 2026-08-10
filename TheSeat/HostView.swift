@@ -86,54 +86,54 @@ struct HostView: View {
     @State private var dragOffset: CGSize = .zero
 
     private var questionList: some View {
-        ZStack {
-            // Ornamental flourish above cards
-            Image("Flourish")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 200)
-                .opacity(0.7)
-                .offset(y: -210)
+        VStack(spacing: 0) {
+            Spacer()
 
-            // Peek cards behind (show up to 2 behind)
-            ForEach(Array(sessionManager.questionQueue.enumerated().reversed()), id: \.offset) { index, question in
-                if index < 3 {
-                    questionCard(question)
-                        .offset(x: CGFloat(index) * 20)
-                        .scaleEffect(1.0 - CGFloat(index) * 0.05)
-                        .opacity(index == 0 ? 1.0 : 0.5)
-                        .zIndex(Double(sessionManager.questionQueue.count - index))
-                        .offset(x: index == 0 ? dragOffset.width : 0)
-                        .rotationEffect(index == 0 ? .degrees(Double(dragOffset.width) / 20) : .zero)
-                        .gesture(index == 0 ? swipeGesture : nil)
-                        .onTapGesture {
-                            if index == 0 {
-                                sessionManager.selectQuestion(at: 0)
-                            }
+            // Flourish + Cards + Flourish as one centered unit
+            VStack(spacing: 20) {
+                Image("Flourish")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200)
+                    .opacity(0.7)
+
+                ZStack {
+                    ForEach(Array(sessionManager.questionQueue.enumerated().reversed()), id: \.offset) { index, question in
+                        if index < 3 {
+                            questionCard(question)
+                                .offset(x: CGFloat(index) * 20)
+                                .scaleEffect(1.0 - CGFloat(index) * 0.05)
+                                .opacity(index == 0 ? 1.0 : 0.5)
+                                .zIndex(Double(sessionManager.questionQueue.count - index))
+                                .offset(x: index == 0 ? dragOffset.width : 0)
+                                .rotationEffect(index == 0 ? .degrees(Double(dragOffset.width) / 20) : .zero)
+                                .gesture(index == 0 ? swipeGesture : nil)
+                                .onTapGesture {
+                                    if index == 0 {
+                                        sessionManager.selectQuestion(at: 0)
+                                    }
+                                }
+                                .animation(.spring(response: 0.3), value: dragOffset)
                         }
-                        .animation(.spring(response: 0.3), value: dragOffset)
+                    }
                 }
+
+                Image("Flourish")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200)
+                    .opacity(0.7)
+                    .rotationEffect(.degrees(180))
             }
 
-            // Ornamental flourish below cards (flipped)
-            Image("Flourish")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 200)
-                .opacity(0.7)
-                .rotationEffect(.degrees(180))
-                .offset(y: 210)
+            Spacer()
 
-            // Instructions
-            VStack {
-                Spacer()
-                Text("swipe to browse · tap to choose")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.3))
-                    .padding(.bottom, 30)
-            }
+            // Instructions pinned to bottom
+            Text("swipe to browse · tap to choose")
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.3))
+                .padding(.bottom, 30)
         }
-        .padding(.top, 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -163,24 +163,24 @@ struct HostView: View {
                 dragOffset = value.translation
             }
             .onEnded { value in
-                if value.translation.width > 150 {
+                if value.translation.width > 80 {
                     // Swipe right — move to back (cycle forward)
-                    withAnimation(.spring(response: 0.3)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
                         dragOffset = CGSize(width: 500, height: 0)
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                         if !self.sessionManager.questionQueue.isEmpty {
                             let question = self.sessionManager.questionQueue.removeFirst()
                             self.sessionManager.questionQueue.append(question)
                         }
                         dragOffset = .zero
                     }
-                } else if value.translation.width < -150 {
+                } else if value.translation.width < -80 {
                     // Swipe left — move to back (cycle backward)
-                    withAnimation(.spring(response: 0.3)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
                         dragOffset = CGSize(width: -500, height: 0)
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                         if !self.sessionManager.questionQueue.isEmpty {
                             let question = self.sessionManager.questionQueue.removeLast()
                             self.sessionManager.questionQueue.insert(question, at: 0)
@@ -189,7 +189,7 @@ struct HostView: View {
                     }
                 } else {
                     // Snap back
-                    withAnimation(.spring(response: 0.3)) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         dragOffset = .zero
                     }
                 }

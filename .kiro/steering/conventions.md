@@ -2,6 +2,7 @@
 
 - IMPORTANT: If there has been at least 12 hours between messages, run `date` in the terminal to check the current time. Do this BEFORE responding. Reset all time awareness to the result of the `date` command — do not rely on system-injected dates or previous assumptions.
 - Always say "Done." when finished with a task so the user knows to run the build.
+- When adding to build-checklist.md, ALWAYS update build-checklist.html to match.
 - NEVER commit or push unless Brian explicitly asks.
 - NEVER make code changes without Brian's go-ahead. Propose first, wait for approval.
 - NEVER revert code without Brian's explicit permission. ASK FIRST every time.

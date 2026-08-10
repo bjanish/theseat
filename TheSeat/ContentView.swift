@@ -93,7 +93,7 @@ struct ContentView: View {
                 Button {
                     sessionManager.startHosting()
                 } label: {
-                    Text(sessionManager.hostName.isEmpty ? "Host a Session" : "\(sessionManager.hostName) is in the seat")
+                    Text(sessionManager.hostName.isEmpty ? "Take the Seat" : "\(sessionManager.hostName) is in the seat")
                         .font(.headline)
                         .foregroundStyle(sessionManager.hostName.isEmpty ? .white : .white.opacity(0.3))
                         .frame(maxWidth: .infinity)
@@ -110,7 +110,7 @@ struct ContentView: View {
                 Button {
                     sessionManager.joinSession()
                 } label: {
-                    Text(sessionManager.hostName.isEmpty ? "Join a Session" : "Join \(sessionManager.hostName)'s Session")
+                    Text(sessionManager.hostName.isEmpty ? "Join" : "Join \(sessionManager.hostName)")
                         .font(.headline)
                         .foregroundStyle(sessionManager.hostName.isEmpty ? .white.opacity(0.3) : .white)
                         .frame(maxWidth: .infinity)

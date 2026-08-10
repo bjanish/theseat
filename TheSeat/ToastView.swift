@@ -31,9 +31,9 @@ struct ToastModifier: ViewModifier {
                 VStack {
                     ToastView(message: toast.text, borderColor: toast.borderColor)
                         .transition(.move(edge: .top).combined(with: .opacity))
-                        .padding(.top, 60)
                     Spacer()
                 }
+                .padding(.top, 10)
                 .id(toast.id)
                 .animation(.easeInOut(duration: 0.3), value: self.toast)
             }

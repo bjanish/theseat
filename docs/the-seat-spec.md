@@ -239,9 +239,14 @@ enum SeatMessage: Codable, Sendable {
 
 ## 11. Paywall (TBD — ship free first)
 
-- Ship v1.0 free. No paywall.
-- Evaluate after launch whether to gate hosting sessions (same model as HCF) or add cosmetics.
-- Decision deferred — don't want paywall friction on a brand new app that needs word-of-mouth growth.
+- Ship v1.0 with paywall. Same model as HCF.
+- One-time $0.99 non-consumable: gates hosting after 5 free sessions
+- Session count increments when first player joins (not on host tap — failed/empty sessions don't count)
+- StoreKit 2 / StoreManager (@MainActor @Observable)
+- Restore Purchase in Settings
+- Paywall UI matches app theme (gold, dark, Cinzel)
+- `paywallEnabled` flag behind `#if DEBUG` — defaults to false for testing, enable to test paywall
+- Joining is always free — only hosting is gated
 
 ---
 

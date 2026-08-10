@@ -3,94 +3,154 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Seat — Build Checklist</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: #1e1e1e;
+            background: #0d0d0d;
             color: #e0e0e0;
-            font-family: -apple-system, sans-serif;
-            font-size: 16px;
-            line-height: 1.6;
-            padding: 40px;
-            max-width: 800px;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            padding: 60px 40px;
+            max-width: 860px;
             margin: 0 auto;
         }
 
         h1 {
+            font-family: 'Georgia', serif;
+            font-size: 32px;
+            font-weight: normal;
             color: #d4a84b;
-            font-size: 28px;
-            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 16px;
+            margin-bottom: 8px;
+        }
+
+        h1 span {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            letter-spacing: 0;
+            text-transform: none;
+            margin-top: 6px;
         }
 
         h2 {
+            font-size: 16px;
+            font-weight: 600;
             color: #d4a84b;
-            font-size: 20px;
-            margin-top: 30px;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid #444;
-            margin: 25px 0;
-        }
-
-        p {
-            margin: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1a1a1a;
         }
 
         ul {
             list-style: none;
-            padding-left: 10px;
+            padding-left: 0;
+            margin-bottom: 8px;
         }
 
         li {
-            margin: 6px 0;
+            margin: 10px 0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        li:hover {
+            background: #1a1a1a;
         }
 
         li.done {
-            color: #6abf69;
+            color: #5cb85c;
         }
 
         li.done::before {
-            content: "✓ ";
-            font-weight: bold;
+            content: "●";
+            display: inline-block;
+            width: 20px;
+            color: #5cb85c;
+            font-size: 10px;
         }
 
         li.todo {
-            color: #cc6666;
+            color: #a0a0a0;
         }
 
         li.todo::before {
-            content: "○ ";
-        }
-
-        li.plain {
-            color: #cccccc;
-        }
-
-        li.plain::before {
-            content: "• ";
+            content: "○";
+            display: inline-block;
+            width: 20px;
+            color: #555;
+            font-size: 10px;
         }
 
         code {
-            font-family: "SF Mono", Menlo, monospace;
-            font-size: 13px;
-            background: #333;
-            color: #a8d4a8;
-            padding: 2px 5px;
-            border-radius: 3px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px;
+            background: #1a1a1a;
+            color: #d4a84b;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9eff, #7bb8ff);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .section-count {
+            float: right;
+            font-size: 12px;
+            color: #555;
+            font-weight: normal;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            font-size: 12px;
+            color: #444;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>The Seat — Build Checklist</h1>
-    <p>Spec order = build order. Each section done-done before moving to the next.</p>
+    <h1>The Seat<span>Build Checklist — Spec order = build order</span></h1>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 72%"></div>
+    </div>
+    <div style="font-size: 12px; color: #4a9eff; margin-top: 6px; text-align: right;">72% complete</div>
 
-    <hr>
-
-    <h2>1. Tech Stack &amp; File Structure</h2>
+    <h2>1. Tech Stack &amp; File Structure <span class="section-count">6/6</span></h2>
     <ul>
         <li class="done">SwiftUI + Network framework + AVFoundation</li>
         <li class="done">@MainActor @Observable SessionManager</li>
@@ -100,9 +160,7 @@
         <li class="done">App icon: ornate chair, dark background, gold tone, spotlight</li>
     </ul>
 
-    <hr>
-
-    <h2>2. Networking</h2>
+    <h2>2. Networking <span class="section-count">14/16</span></h2>
     <ul>
         <li class="done">NWBrowser + NWListener + NWConnection, <code>includePeerToPeer = true</code></li>
         <li class="done">Service type: <code>_theseat._tcp</code></li>
@@ -120,19 +178,18 @@
         <li class="done">Ghost connection timeout (3s — no .join received)</li>
         <li class="todo">Test host-to-player on two real phones (second session reconnect)</li>
         <li class="todo">Verify auto-reconnect after player resume from background</li>
+        <li class="todo">Test without WiFi (AWDL peer-to-peer only)</li>
     </ul>
 
-    <hr>
-
-    <h2>3. Screens &amp; UI Skeleton</h2>
+    <h2>3. Screens &amp; UI <span class="section-count">13/14</span></h2>
     <ul>
         <li class="done">Name entry: text field, persists UserDefaults, first launch only</li>
         <li class="done">Solo: seat glow + "THE SEAT" branding + Host/Join buttons</li>
         <li class="done">Solo: spotlight effect, Cinzel font, tagline on appear</li>
-        <li class="done">Solo: "Join [host name]'s Session" button with gold glow when host detected</li>
+        <li class="done">Solo: "Join [host name]" button with gold glow when host detected</li>
         <li class="done">Host: card stack with gold border, Cinzel font, swipe left/right to cycle, tap to choose</li>
         <li class="done">Host: flourish decorations above and below cards</li>
-        <li class="done">Host: "swipe to browse &middot; tap to choose" instruction</li>
+        <li class="done">Host: "swipe to browse · tap to choose" instruction</li>
         <li class="done">Host: full-screen question display in Cinzel, tap to dismiss</li>
         <li class="done">Host: Pass button, End button in top bar</li>
         <li class="done">Player: text input with gold underline, 150-char counter, send button</li>
@@ -142,9 +199,7 @@
         <li class="todo">Settings accessible from solo screen</li>
     </ul>
 
-    <hr>
-
-    <h2>4. Host Queue Behavior</h2>
+    <h2>4. Host Queue Behavior <span class="section-count">6/6</span></h2>
     <ul>
         <li class="done">FIFO array</li>
         <li class="done">Swipe left/right = cycle through questions (nothing deleted)</li>
@@ -154,9 +209,7 @@
         <li class="done">Host session stays live after last player leaves (host ends manually)</li>
     </ul>
 
-    <hr>
-
-    <h2>5. Player Input &amp; Character Limit</h2>
+    <h2>5. Player Input &amp; Character Limit <span class="section-count">8/10</span></h2>
     <ul>
         <li class="done">150 characters max</li>
         <li class="done">Counter shows remaining</li>
@@ -170,9 +223,7 @@
         <li class="todo">Trim + reject empty whitespace</li>
     </ul>
 
-    <hr>
-
-    <h2>6. Visual Design</h2>
+    <h2>6. Visual Design <span class="section-count">8/9</span></h2>
     <ul>
         <li class="done">Dark UI: Color(white: 0.08) background with spotlight gradient</li>
         <li class="done">"THE SEAT" Cinzel font, tracked uppercase, gold tone, text shadow</li>
@@ -185,9 +236,7 @@
         <li class="todo">Player screen polish: minimal, input is focus</li>
     </ul>
 
-    <hr>
-
-    <h2>7. Audio &amp; Haptics</h2>
+    <h2>7. Audio &amp; Haptics <span class="section-count">3/8</span></h2>
     <ul>
         <li class="todo">Question received (host): ping + light haptic</li>
         <li class="done">Question sent (player): light haptic</li>
@@ -199,12 +248,10 @@
         <li class="done">Easter egg: heavy haptic on chair tap</li>
     </ul>
 
-    <hr>
-
-    <h2>8. Pass the Seat</h2>
+    <h2>8. Pass the Seat <span class="section-count">8/10</span></h2>
     <ul>
-        <li class="done">Host taps "Pass" &rarr; player list sheet</li>
-        <li class="done">Tap name &rarr; <code>.passTheSeat</code> + <code>.youAreHost</code> sent</li>
+        <li class="done">Host taps "Pass" → player list sheet</li>
+        <li class="done">Tap name → <code>.passTheSeat</code> + <code>.youAreHost</code> sent</li>
         <li class="done">Target becomes host, original becomes player</li>
         <li class="done">Queue does NOT transfer (fresh start)</li>
         <li class="done">Connections stay alive</li>
@@ -215,23 +262,19 @@
         <li class="todo">Test pass on real devices</li>
     </ul>
 
-    <hr>
-
-    <h2>9. Lifecycle</h2>
+    <h2>9. Lifecycle <span class="section-count">6/8</span></h2>
     <ul>
-        <li class="done">Host backgrounds &rarr; <code>.sessionEnd</code> &rarr; teardown</li>
-        <li class="done">Player backgrounds &rarr; cancel connection + browser</li>
-        <li class="done">Player resumes &rarr; restart browser, auto-reconnect</li>
-        <li class="done">Host resumes &rarr; session gone, back to solo</li>
-        <li class="done">"End Session" = same as backgrounding</li>
+        <li class="done">Host backgrounds → <code>.sessionEnd</code> → teardown</li>
+        <li class="done">Player backgrounds → cancel connection + browser</li>
+        <li class="done">Player resumes → restart browser, auto-reconnect</li>
+        <li class="done">Host resumes → session gone, back to solo</li>
+        <li class="done">"End" = same as backgrounding</li>
         <li class="done">Player returns to solo on host disconnect</li>
         <li class="todo">Idle timer disabled while active</li>
         <li class="todo">Test background/resume on real devices</li>
     </ul>
 
-    <hr>
-
-    <h2>10. Onboarding</h2>
+    <h2>10. Onboarding <span class="section-count">3/4</span></h2>
     <ul>
         <li class="done">3 slides: hero, flow, control</li>
         <li class="done">TabView swipe pattern</li>
@@ -239,28 +282,18 @@
         <li class="todo">Polish slide content and visuals</li>
     </ul>
 
-    <hr>
-
-    <h2>11. Paywall</h2>
+    <h2>11. Paywall <span class="section-count">0/7</span></h2>
     <ul>
-        <li class="done">Ship v1.0 free — no paywall code needed</li>
+        <li class="todo">One-time $0.99 non-consumable unlock</li>
+        <li class="todo">Gate hosting after 5 free sessions</li>
+        <li class="todo">Session count increments when first player joins (not on tap)</li>
+        <li class="todo">StoreKit 2 / StoreManager (@MainActor @Observable)</li>
+        <li class="todo">Restore Purchase in Settings</li>
+        <li class="todo">Paywall UI matches app theme (gold, dark, Cinzel)</li>
+        <li class="todo"><code>paywallEnabled</code> flag behind <code>#if DEBUG</code> for testing</li>
     </ul>
 
-    <hr>
-
-    <h2>13. Solo Mode: Would You Answer?</h2>
-    <ul>
-        <li class="todo">Random questions from curated pool</li>
-        <li class="todo">Swipe right = "I'd answer that" &rarr; streak increments</li>
-        <li class="todo">Swipe left = "Pass" &rarr; streak resets to 0</li>
-        <li class="todo">Streak counter + best streak</li>
-        <li class="todo">Question pool (100+ questions)</li>
-        <li class="todo">Tap chair to start</li>
-    </ul>
-
-    <hr>
-
-    <h2>12. Open Questions (decisions made)</h2>
+    <h2>12. Decisions Made <span class="section-count">5/5</span></h2>
     <ul>
         <li class="done">No going back to previous questions — swipe cycles, nothing deleted</li>
         <li class="done">Players see current question (shared screen moment)</li>
@@ -269,9 +302,17 @@
         <li class="done">One question per host (not unlimited)</li>
     </ul>
 
-    <hr>
+    <h2>13. Solo Mode: Would You Answer? <span class="section-count">0/6</span></h2>
+    <ul>
+        <li class="todo">Random questions from curated pool</li>
+        <li class="todo">Swipe right = "I'd answer that" → streak increments</li>
+        <li class="todo">Swipe left = "Pass" → streak resets to 0</li>
+        <li class="todo">Streak counter + best streak</li>
+        <li class="todo">Question pool (100+ questions)</li>
+        <li class="todo">Tap chair to start</li>
+    </ul>
 
-    <h2>Debug: Simulated Characters</h2>
+    <h2>Debug: Simulated Characters <span class="section-count">6/6</span></h2>
     <ul>
         <li class="done">Add simulated players behind <code>#if DEBUG</code> (Charlie, Lucy, Schroeder)</li>
         <li class="done">Appear in connectedPeers list and player count</li>
@@ -280,6 +321,8 @@
         <li class="done">Question pool: PG-13 funny/awkward questions</li>
         <li class="done">Production/Release builds: no simulated characters (behind <code>#if DEBUG</code>)</li>
     </ul>
+
+    <footer>The Seat — com.bjanish.askme — v1.0</footer>
 
 </body>
 

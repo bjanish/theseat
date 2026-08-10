@@ -471,11 +471,8 @@ final class SessionManager {
                     connectToHost(endpoint: result.endpoint)
                     break
                 } else if !wantsToJoin && !isConnectingToHost {
-                    // Just browsing — update hostName so button text changes
-                    if !announcedHosts.contains(name) {
-                        announcedHosts.insert(name)
-                        hostName = discoveredHostName
-                    }
+                    // Always update hostName so the button reflects current state
+                    hostName = discoveredHostName
                     break
                 }
             }

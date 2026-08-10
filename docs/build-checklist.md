@@ -33,6 +33,7 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Ghost connection timeout (3s — no .join received)
 - [ ] Test host-to-player on two real phones (second session reconnect)
 - [ ] Verify auto-reconnect after player resume from background
+- [ ] Test without WiFi (AWDL peer-to-peer only)
 
 ---
 
@@ -147,7 +148,13 @@ Spec order = build order. Each section done-done before moving to the next.
 
 ## 11. Paywall
 
-- [x] Ship v1.0 free — no paywall code needed
+- [ ] One-time $0.99 non-consumable unlock
+- [ ] Gate hosting after 5 free sessions
+- [ ] Session count increments when first player joins (not on tap)
+- [ ] StoreKit 2 / StoreManager (@MainActor @Observable)
+- [ ] Restore Purchase in Settings
+- [ ] Paywall UI matches app theme (gold, dark, Cinzel)
+- [ ] `paywallEnabled` flag behind `#if DEBUG` for testing
 
 ---
 
