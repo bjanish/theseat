@@ -92,7 +92,6 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Card stack with gold border, peek to the right
 - [x] Flourish decorations (ornamental gold image) above and below cards
 - [x] Gold glow on "Join" button when host detected
-- [ ] Player screen polish: minimal, input is focus
 
 ---
 

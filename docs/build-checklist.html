@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Seat — Build Checklist</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -13,142 +15,271 @@
         }
 
         body {
-            background: #0d0d0d;
+            background: #080808;
             color: #e0e0e0;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            font-size: 15px;
-            line-height: 1.7;
-            padding: 60px 40px;
-            max-width: 860px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+            line-height: 1.8;
+            padding: 80px 40px;
+            max-width: 900px;
             margin: 0 auto;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212, 168, 75, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
         }
 
         h1 {
-            font-family: 'Georgia', serif;
-            font-size: 32px;
-            font-weight: normal;
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 38px;
+            font-weight: 400;
             color: #d4a84b;
-            letter-spacing: 2px;
+            letter-spacing: 6px;
             text-transform: uppercase;
-            border-bottom: 1px solid #2a2a2a;
-            padding-bottom: 16px;
             margin-bottom: 8px;
+            text-shadow: 0 0 40px rgba(212, 168, 75, 0.15);
         }
 
-        h1 span {
-            display: block;
-            font-size: 13px;
-            color: #666;
-            letter-spacing: 0;
-            text-transform: none;
-            margin-top: 6px;
-        }
-
-        h2 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #d4a84b;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-top: 48px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #1a1a1a;
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;
-            margin-bottom: 8px;
-        }
-
-        li {
-            margin: 10px 0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-
-        li:hover {
-            background: #1a1a1a;
-        }
-
-        li.done {
-            color: #5cb85c;
-        }
-
-        li.done::before {
-            content: "●";
-            display: inline-block;
-            width: 20px;
-            color: #5cb85c;
-            font-size: 10px;
-        }
-
-        li.todo {
-            color: #a0a0a0;
-        }
-
-        li.todo::before {
-            content: "○";
-            display: inline-block;
-            width: 20px;
-            color: #555;
-            font-size: 10px;
-        }
-
-        code {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+        .subtitle {
             font-size: 12px;
-            background: #1a1a1a;
-            color: #d4a84b;
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid #2a2a2a;
+            color: #555;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .progress-container {
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
         }
 
         .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #222;
-            border-radius: 4px;
-            margin-top: 12px;
+            width: 200px;
+            height: 6px;
+            background: #1a1a1a;
+            border-radius: 3px;
             overflow: hidden;
-            border: 1px solid #333;
+            border: 1px solid #2a2a2a;
         }
 
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #4a9eff, #7bb8ff);
-            border-radius: 4px;
-            transition: width 0.3s;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+            box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
+        }
+
+        .progress-text {
+            font-size: 11px;
+            color: #4a9eff;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 15px;
+            font-weight: 400;
+            color: #d4a84b;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 56px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(212, 168, 75, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
         }
 
         .section-count {
-            float: right;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            color: #444;
+            font-weight: 400;
+            letter-spacing: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin: 0;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        li:hover {
+            background: rgba(255, 255, 255, 0.02);
+            transform: translateX(4px);
+        }
+
+        li.done {
+            color: #7ed87e;
+            border-left-color: rgba(126, 216, 126, 0.3);
+        }
+
+        li.done::before {
+            content: "✓";
+            display: inline-block;
+            width: 24px;
+            color: #5cb85c;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        li.todo {
+            color: #888;
+        }
+
+        li.todo::before {
+            content: "○";
+            display: inline-block;
+            width: 24px;
+            color: #444;
             font-size: 12px;
-            color: #555;
-            font-weight: normal;
+        }
+
+        li.todo:hover {
+            color: #aaa;
+            border-left-color: rgba(255, 255, 255, 0.1);
+        }
+
+        code {
+            font-family: 'SF Mono', 'JetBrains Mono', monospace;
+            font-size: 11px;
+            background: rgba(212, 168, 75, 0.08);
+            color: #d4a84b;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(212, 168, 75, 0.15);
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 168, 75, 0.2), transparent);
+            margin: 48px 0;
         }
 
         footer {
-            margin-top: 60px;
-            padding-top: 20px;
+            margin-top: 80px;
+            padding-top: 30px;
             border-top: 1px solid #1a1a1a;
-            font-size: 12px;
-            color: #444;
             text-align: center;
+            position: relative;
+        }
+
+        footer::before {
+            content: '❧';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg);
+            font-size: 18px;
+            color: rgba(212, 168, 75, 0.2);
+            background: #080808;
+            padding: 0 16px;
+        }
+
+        .footer-text {
+            font-size: 11px;
+            color: #333;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Cinzel', serif;
+            font-size: 28px;
+            color: #d4a84b;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #555;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% center;
+            }
+
+            100% {
+                background-position: 200% center;
+            }
+        }
+
+        h1 {
+            background: linear-gradient(90deg, #d4a84b 0%, #f0d78c 50%, #d4a84b 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 8s linear infinite;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>The Seat<span>Build Checklist — Spec order = build order</span></h1>
-    <div class="progress-bar">
-        <div class="progress-fill" style="width: 72%"></div>
+    <div class="header">
+        <img src="chair.png" style="width: 140px; margin-bottom: 16px; opacity: 0.9;">
+        <h1 id="title">The Seat</h1>
+        <div class="subtitle">Build Checklist</div>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 72%"></div>
+            </div>
+            <span class="progress-text">72%</span>
+        </div>
+        <div class="stats">
+            <div class="stat"><span class="stat-number">75</span><span class="stat-label">Done</span></div>
+            <div class="stat"><span class="stat-number">29</span><span class="stat-label">Remaining</span></div>
+            <div class="stat"><span class="stat-number">14</span><span class="stat-label">Sections</span></div>
+        </div>
     </div>
-    <div style="font-size: 12px; color: #4a9eff; margin-top: 6px; text-align: right;">72% complete</div>
 
     <h2>1. Tech Stack &amp; File Structure <span class="section-count">6/6</span></h2>
     <ul>
@@ -160,7 +291,9 @@
         <li class="done">App icon: ornate chair, dark background, gold tone, spotlight</li>
     </ul>
 
-    <h2>2. Networking <span class="section-count">14/16</span></h2>
+    <div class="divider"></div>
+
+    <h2>2. Networking <span class="section-count">14/17</span></h2>
     <ul>
         <li class="done">NWBrowser + NWListener + NWConnection, <code>includePeerToPeer = true</code></li>
         <li class="done">Service type: <code>_theseat._tcp</code></li>
@@ -181,6 +314,8 @@
         <li class="todo">Test without WiFi (AWDL peer-to-peer only)</li>
     </ul>
 
+    <div class="divider"></div>
+
     <h2>3. Screens &amp; UI <span class="section-count">13/14</span></h2>
     <ul>
         <li class="done">Name entry: text field, persists UserDefaults, first launch only</li>
@@ -199,6 +334,8 @@
         <li class="todo">Settings accessible from solo screen</li>
     </ul>
 
+    <div class="divider"></div>
+
     <h2>4. Host Queue Behavior <span class="section-count">6/6</span></h2>
     <ul>
         <li class="done">FIFO array</li>
@@ -208,6 +345,8 @@
         <li class="done">No duplicate detection on question text</li>
         <li class="done">Host session stays live after last player leaves (host ends manually)</li>
     </ul>
+
+    <div class="divider"></div>
 
     <h2>5. Player Input &amp; Character Limit <span class="section-count">8/10</span></h2>
     <ul>
@@ -223,6 +362,8 @@
         <li class="todo">Trim + reject empty whitespace</li>
     </ul>
 
+    <div class="divider"></div>
+
     <h2>6. Visual Design <span class="section-count">8/9</span></h2>
     <ul>
         <li class="done">Dark UI: Color(white: 0.08) background with spotlight gradient</li>
@@ -233,8 +374,9 @@
         <li class="done">Card stack with gold border, peek to the right</li>
         <li class="done">Flourish decorations (ornamental gold image) above and below cards</li>
         <li class="done">Gold glow on "Join" button when host detected</li>
-        <li class="todo">Player screen polish: minimal, input is focus</li>
     </ul>
+
+    <div class="divider"></div>
 
     <h2>7. Audio &amp; Haptics <span class="section-count">3/8</span></h2>
     <ul>
@@ -247,6 +389,8 @@
         <li class="todo">Custom ping sound bundled (not card flip)</li>
         <li class="done">Easter egg: heavy haptic on chair tap</li>
     </ul>
+
+    <div class="divider"></div>
 
     <h2>8. Pass the Seat <span class="section-count">8/10</span></h2>
     <ul>
@@ -262,6 +406,8 @@
         <li class="todo">Test pass on real devices</li>
     </ul>
 
+    <div class="divider"></div>
+
     <h2>9. Lifecycle <span class="section-count">6/8</span></h2>
     <ul>
         <li class="done">Host backgrounds → <code>.sessionEnd</code> → teardown</li>
@@ -274,6 +420,8 @@
         <li class="todo">Test background/resume on real devices</li>
     </ul>
 
+    <div class="divider"></div>
+
     <h2>10. Onboarding <span class="section-count">3/4</span></h2>
     <ul>
         <li class="done">3 slides: hero, flow, control</li>
@@ -281,6 +429,8 @@
         <li class="done">Local network permission mention</li>
         <li class="todo">Polish slide content and visuals</li>
     </ul>
+
+    <div class="divider"></div>
 
     <h2>11. Paywall <span class="section-count">0/7</span></h2>
     <ul>
@@ -293,6 +443,8 @@
         <li class="todo"><code>paywallEnabled</code> flag behind <code>#if DEBUG</code> for testing</li>
     </ul>
 
+    <div class="divider"></div>
+
     <h2>12. Decisions Made <span class="section-count">5/5</span></h2>
     <ul>
         <li class="done">No going back to previous questions — swipe cycles, nothing deleted</li>
@@ -301,6 +453,8 @@
         <li class="done">Empty queue: glow + "Waiting for questions..."</li>
         <li class="done">One question per host (not unlimited)</li>
     </ul>
+
+    <div class="divider"></div>
 
     <h2>13. Solo Mode: Would You Answer? <span class="section-count">0/6</span></h2>
     <ul>
@@ -312,6 +466,8 @@
         <li class="todo">Tap chair to start</li>
     </ul>
 
+    <div class="divider"></div>
+
     <h2>Debug: Simulated Characters <span class="section-count">6/6</span></h2>
     <ul>
         <li class="done">Add simulated players behind <code>#if DEBUG</code> (Charlie, Lucy, Schroeder)</li>
@@ -322,8 +478,27 @@
         <li class="done">Production/Release builds: no simulated characters (behind <code>#if DEBUG</code>)</li>
     </ul>
 
-    <footer>The Seat — com.bjanish.askme — v1.0</footer>
+    <footer>
+        <div class="footer-text">The Seat · com.bjanish.askme · v1.0</div>
+    </footer>
 
 </body>
 
 </html>
+
+<script>
+    let clickCount = 0;
+    const title = document.getElementById('title');
+    title.style.cursor = 'pointer';
+    title.addEventListener('click', () => {
+        clickCount++;
+        title.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2)';
+        title.style.transform = `rotateY(${clickCount * 360}deg)`;
+        const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#7c4dff', '#4a9eff'];
+        const randomColor = colors[clickCount % colors.length];
+        title.style.setProperty('-webkit-text-fill-color', randomColor);
+        setTimeout(() => {
+            title.style.setProperty('-webkit-text-fill-color', 'transparent');
+        }, 600);
+    });
+</script>

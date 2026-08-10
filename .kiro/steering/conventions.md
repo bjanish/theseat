@@ -46,3 +46,17 @@
 - `GENERATE_INFOPLIST_FILE = YES` is unreliable for NSBonjourServices and NSLocalNetworkUsageDescription — use an explicit Info.plist file instead.
 - Simulator cannot do local network browsing (NoAuth error) — test networking on real devices only.
 - iOS first-time keyboard load is slow (~1-2s) after fresh install — this is an Apple issue, not a code bug.
+
+# Build Checklist Standard (All Projects)
+
+- Every project gets a `docs/build-checklist.html` as a project dashboard
+- Template: dark theme (#080808), Cinzel headers with gold shimmer animation, Inter body font
+- Stats dashboard at top (Done / Remaining / Sections counts)
+- Blue progress bar with percentage
+- Gold gradient dividers between sections
+- Section counts (done/total) on each heading
+- Green checkmarks for done, gray circles for todo
+- Hover animations (translateX slide)
+- Flourish ornaments in header and footer
+- Google Fonts loaded (Cinzel + Inter)
+- When adding to build-checklist.md, ALWAYS update build-checklist.html to match
