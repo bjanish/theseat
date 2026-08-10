@@ -164,10 +164,12 @@ enum SeatMessage: Codable, Sendable {
 - Send button disabled when field is empty
 - Light haptic on send
 - Field clears after send
-- ONE question per player per session — input locks after sending
+- ONE question per HOST — input locks after sending. Resets when the seat passes to a new host.
 - Confirmation modal before sending — player sees their question and can edit or confirm before committing. One shot means they need the chance to review.
 - After send: show "Your question is in" confirmation, input disabled
-- Player gets a new question if the seat passes (new session = fresh slot)
+- When `.newHost` is received, `hasAsked` resets and input opens again — fresh question for the new host
+- Players stay connected through seat passes. No need to leave and rejoin.
+- Player only leaves if they're done playing entirely.
 - Short questions are funnier. Constraint breeds creativity. One shot raises the stakes.
 
 ---

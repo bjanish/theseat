@@ -20,6 +20,7 @@ final class SessionManager {
     var currentDisplayedQuestion: String?
     var hostName: String = ""
     var isConnectingToHost: Bool = false
+    var hostRound: Int = 0
     var toast: ToastMessage?
 
     func showToast(_ message: String, duration: Double = 3.0) {
@@ -117,6 +118,9 @@ final class SessionManager {
               let connection = playerConnections.first(where: { ObjectIdentifier($0) == id }) else { return }
         send(.passTheSeat(toName: name), to: connection)
         send(.youAreHost, to: connection)
+
+        // Broadcast new host to all players
+        sendToAllPlayers(.newHost(name: name))
 
         // Transition self to player
         role = .player
@@ -259,15 +263,21 @@ final class SessionManager {
     }
 
     private func handleNewPlayerConnection(_ connection: NWConnection) {
-        // Endpoint dedup
+        // Endpoint dedup — strip port to catch same device on different ports
         let endpointDesc = "\(connection.endpoint)"
-        guard !connectedEndpoints.contains(endpointDesc) else {
+        let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
+        #if DEBUG
+        print("[HOST] New connection from: \(endpointDesc) (base: \(endpointBase))")
+        print("[HOST] Current endpoints: \(connectedEndpoints)")
+        #endif
+        guard !connectedEndpoints.contains(endpointBase) else {
             #if DEBUG
-            print("[HOST] Duplicate endpoint rejected: \(endpointDesc)")
+            print("[HOST] Duplicate endpoint rejected: \(endpointBase)")
             #endif
+            connection.cancel()
             return
         }
-        connectedEndpoints.insert(endpointDesc)
+        connectedEndpoints.insert(endpointBase)
 
         connection.stateUpdateHandler = { [weak self] state in
             Task { @MainActor in
@@ -279,6 +289,22 @@ final class SessionManager {
                     // Start receive loop after brief delay
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         self?.receiveLoop(from: connection)
+                    }
+                    // Timeout — if no .join received in 3 seconds, cancel
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+                        guard let self else { return }
+                        let id = ObjectIdentifier(connection)
+                        if self.connectionNames[id] == nil {
+                            // Never got a .join — ghost connection
+                            connection.cancel()
+                            self.playerConnections.removeAll { $0 === connection }
+                            let endpointDesc = "\(connection.endpoint)"
+                            let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
+                            self.connectedEndpoints.remove(endpointBase)
+                            #if DEBUG
+                            print("[HOST] Ghost connection timed out — no .join received")
+                            #endif
+                        }
                     }
                 case .failed, .cancelled:
                     self?.handleHostDisconnect(connection)
@@ -305,7 +331,8 @@ final class SessionManager {
             connectedDeviceIDs.remove(did)
         }
         let endpointDesc = "\(connection.endpoint)"
-        connectedEndpoints.remove(endpointDesc)
+        let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
+        connectedEndpoints.remove(endpointBase)
         connectionNames.removeValue(forKey: id)
         connectionDeviceIDs.removeValue(forKey: id)
         playerConnections.removeAll { $0 === connection }
@@ -588,6 +615,15 @@ final class SessionManager {
             questionQueue.removeAll()
             currentDisplayedQuestion = nil
 
+        case .newHost(let name):
+            hostName = name
+            hostRound += 1
+            currentDisplayedQuestion = nil
+            showToast("\(name) is in the seat")
+            #if DEBUG
+            print("[PLAYER] New host: \(name)")
+            #endif
+
         case .sessionEnd:
             hostConnection?.cancel()
             hostConnection = nil
@@ -626,6 +662,7 @@ final class SessionManager {
         connectedPeers.removeAll()
         questionQueue.removeAll()
         currentDisplayedQuestion = nil
+        hostName = ""
         reconnectAttempts = 0
         wantsToJoin = false
         lastBrowseResults = []

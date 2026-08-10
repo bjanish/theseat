@@ -38,6 +38,10 @@ struct PlayerView: View {
         .onAppear {
             hasAsked = false
         }
+        .onChange(of: sessionManager.hostRound) { _, _ in
+            hasAsked = false
+            questionText = ""
+        }
     }
 
     // MARK: - Top Bar
@@ -82,7 +86,8 @@ struct PlayerView: View {
             HStack(spacing: 12) {
                 TextField("Ask anything...", text: $questionText, axis: .vertical)
                     .lineLimit(1...3)
-                    .textInputAutocapitalization(.sentences)
+                    .keyboardType(.default)
+                    .autocorrectionDisabled(true)
                     .focused($isInputFocused)
                     .onChange(of: questionText) { _, newValue in
                         if newValue.count > characterLimit {

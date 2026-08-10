@@ -6,6 +6,7 @@ enum SeatMessage: Codable, Sendable {
     case currentQuestion(text: String)
     case passTheSeat(toName: String)
     case youAreHost
+    case newHost(name: String)
     case sessionEnd
     case heartbeat
 }

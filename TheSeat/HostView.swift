@@ -41,18 +41,27 @@ struct HostView: View {
             Spacer()
 
             if !sessionManager.questionQueue.isEmpty {
-                Text("\(sessionManager.questionQueue.count) waiting")
+                Text("\(sessionManager.questionQueue.count) question\(sessionManager.questionQueue.count == 1 ? "" : "s")")
                     .font(.subheadline)
                     .foregroundStyle(gold)
             }
 
             Spacer()
 
+            if !sessionManager.connectedPeers.isEmpty {
+                Button("Pass") {
+                    showPassSheet = true
+                }
+                .font(.subheadline)
+                .foregroundStyle(gold)
+            }
+
             Button("End") {
                 sessionManager.endSession()
             }
             .font(.subheadline)
             .foregroundStyle(.red.opacity(0.8))
+            .padding(.leading, 12)
         }
         .padding(.horizontal)
         .padding(.vertical, 12)
@@ -72,37 +81,108 @@ struct HostView: View {
         }
     }
 
-    // MARK: - Question List
+    // MARK: - Question Stack
+
+    @State private var dragOffset: CGSize = .zero
 
     private var questionList: some View {
-        List {
-            ForEach(Array(sessionManager.questionQueue.enumerated()), id: \.offset) { index, question in
-                questionRow(question, at: index)
+        ZStack {
+            // Ornamental flourish above cards
+            Image("Flourish")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 200)
+                .opacity(0.7)
+                .offset(y: -210)
+
+            // Peek cards behind (show up to 2 behind)
+            ForEach(Array(sessionManager.questionQueue.enumerated().reversed()), id: \.offset) { index, question in
+                if index < 3 {
+                    questionCard(question)
+                        .offset(x: CGFloat(index) * 20)
+                        .scaleEffect(1.0 - CGFloat(index) * 0.05)
+                        .opacity(index == 0 ? 1.0 : 0.5)
+                        .zIndex(Double(sessionManager.questionQueue.count - index))
+                        .offset(x: index == 0 ? dragOffset.width : 0)
+                        .rotationEffect(index == 0 ? .degrees(Double(dragOffset.width) / 20) : .zero)
+                        .gesture(index == 0 ? swipeGesture : nil)
+                        .onTapGesture {
+                            if index == 0 {
+                                sessionManager.selectQuestion(at: 0)
+                            }
+                        }
+                        .animation(.spring(response: 0.3), value: dragOffset)
+                }
             }
+
+            // Ornamental flourish below cards (flipped)
+            Image("Flourish")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 200)
+                .opacity(0.7)
+                .rotationEffect(.degrees(180))
+                .offset(y: 210)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
+        .padding(.top, 0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private func questionRow(_ question: String, at index: Int) -> some View {
-        Text(question)
-            .font(.body)
-            .foregroundStyle(.white)
-            .padding(.vertical, 8)
-            .listRowBackground(Color(white: 0.16))
-            .swipeActions(edge: .trailing) {
-                Button {
-                    sessionManager.selectQuestion(at: index)
-                } label: {
-                    Label("Show", systemImage: "eye")
-                }
-                .tint(gold)
+    private func questionCard(_ question: String) -> some View {
+        VStack {
+            Spacer()
+            Text(question)
+                .font(.custom("Cinzel-Regular", size: 22))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .padding(30)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 280)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(white: 0.14))
+                .stroke(gold.opacity(0.4), lineWidth: 1)
+        )
+        .padding(.horizontal, 30)
+    }
+
+    private var swipeGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                dragOffset = value.translation
             }
-            .swipeActions(edge: .leading) {
-                Button(role: .destructive) {
-                    sessionManager.skipQuestion(at: index)
-                } label: {
-                    Label("Skip", systemImage: "xmark")
+            .onEnded { value in
+                if value.translation.width > 150 {
+                    // Swipe right — move to back (cycle forward)
+                    withAnimation(.spring(response: 0.3)) {
+                        dragOffset = CGSize(width: 500, height: 0)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        if !self.sessionManager.questionQueue.isEmpty {
+                            let question = self.sessionManager.questionQueue.removeFirst()
+                            self.sessionManager.questionQueue.append(question)
+                        }
+                        dragOffset = .zero
+                    }
+                } else if value.translation.width < -150 {
+                    // Swipe left — move to back (cycle backward)
+                    withAnimation(.spring(response: 0.3)) {
+                        dragOffset = CGSize(width: -500, height: 0)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        if !self.sessionManager.questionQueue.isEmpty {
+                            let question = self.sessionManager.questionQueue.removeLast()
+                            self.sessionManager.questionQueue.insert(question, at: 0)
+                        }
+                        dragOffset = .zero
+                    }
+                } else {
+                    // Snap back
+                    withAnimation(.spring(response: 0.3)) {
+                        dragOffset = .zero
+                    }
                 }
             }
     }
@@ -115,14 +195,16 @@ struct HostView: View {
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    sessionManager.currentDisplayedQuestion = nil
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        sessionManager.currentDisplayedQuestion = nil
+                    }
                 }
 
             VStack {
                 Spacer()
 
                 Text(question)
-                    .font(.system(size: 32, weight: .medium))
+                    .font(.custom("Cinzel-Regular", size: 28))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 30)
@@ -135,7 +217,9 @@ struct HostView: View {
                     .foregroundStyle(.white.opacity(0.2))
                     .padding(.bottom, 20)
             }
+            .transition(.opacity.combined(with: .scale(scale: 0.95)))
         }
+        .animation(.easeIn(duration: 0.4), value: sessionManager.currentDisplayedQuestion)
     }
 
     // MARK: - Pass the Seat Sheet

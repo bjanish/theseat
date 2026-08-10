@@ -116,9 +116,10 @@ struct ContentView: View {
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.08))
-                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                .fill(sessionManager.hostName.isEmpty ? Color.white.opacity(0.08) : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.2))
+                                .stroke(sessionManager.hostName.isEmpty ? Color.white.opacity(0.3) : Color(red: 0.85, green: 0.70, blue: 0.40), lineWidth: 1)
                         )
+                        .shadow(color: sessionManager.hostName.isEmpty ? .clear : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.4), radius: 8)
                 }
                 .padding(.horizontal, 40)
 
