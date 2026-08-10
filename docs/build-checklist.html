@@ -114,9 +114,11 @@
         <li class="done">Player browser finds <code>-host</code> service, auto-connects, sends <code>.join</code></li>
         <li class="done">Same-name auto-suffix ("Brian 2")</li>
         <li class="done">Connection-to-name dictionary (not parallel arrays)</li>
-        <li class="done">Messages: join, question, currentQuestion, passTheSeat, youAreHost, sessionEnd, heartbeat</li>
-        <li class="todo">Test host-to-player connection on two real devices</li>
-        <li class="todo">Verify auto-reconnect after player resume from background</li>
+        <li class="done">Messages: join, question, currentQuestion, passTheSeat, youAreHost, newHost, sessionEnd, heartbeat</li>
+        <li class="done">Toast system for connection events</li>
+        <li class="done">Browser runs passively on solo screen, shows host name on Join button</li>
+        <li class="done">Ghost connection timeout (3s — no .join received)</li>
+        <li class="todo">Test host-to-player on two real phones (second session reconnect)</li>
         <li class="todo">Verify auto-reconnect after player resume from background</li>
     </ul>
 
@@ -126,10 +128,18 @@
     <ul>
         <li class="done">Name entry: text field, persists UserDefaults, first launch only</li>
         <li class="done">Solo: seat glow + "THE SEAT" branding + Host/Join buttons</li>
-        <li class="done">Host: question display, queue count, swipe left skip, swipe right show, end session, player count</li>
-        <li class="done">Player: text input, send button, 150-char counter, "Connected to [host]", leave button</li>
+        <li class="done">Solo: spotlight effect, Cinzel font, tagline on appear</li>
+        <li class="done">Solo: "Join [host name]'s Session" button with gold glow when host detected</li>
+        <li class="done">Host: card stack with gold border, Cinzel font, swipe left/right to cycle, tap to choose</li>
+        <li class="done">Host: flourish decorations above and below cards</li>
+        <li class="done">Host: "swipe to browse &middot; tap to choose" instruction</li>
+        <li class="done">Host: full-screen question display in Cinzel, tap to dismiss</li>
+        <li class="done">Host: Pass button, End button in top bar</li>
+        <li class="done">Player: text input with gold underline, 150-char counter, send button</li>
+        <li class="done">Player: "Your question is in" + "Stay connected" after sending</li>
+        <li class="done">Player: shared question display (Cinzel) when host selects a question</li>
+        <li class="done">Player: Leave button</li>
         <li class="todo">Settings accessible from solo screen</li>
-        <li class="todo">Solo &harr; Host toggle (spec says toggle pattern like HCF, currently using buttons)</li>
     </ul>
 
     <hr>
@@ -137,12 +147,11 @@
     <h2>4. Host Queue Behavior</h2>
     <ul>
         <li class="done">FIFO array</li>
-        <li class="done">Swipe left = skip (gone forever)</li>
-        <li class="done">Swipe right/tap = select (full-screen, sent as <code>.currentQuestion</code>)</li>
-        <li class="todo">No undo on skip — verify behavior</li>
+        <li class="done">Swipe left/right = cycle through questions (nothing deleted)</li>
+        <li class="done">Tap = select (full-screen, sent as <code>.currentQuestion</code>)</li>
         <li class="done">Queue persists during session</li>
         <li class="done">No duplicate detection on question text</li>
-        <li class="todo">Test with multiple rapid questions</li>
+        <li class="done">Host session stays live after last player leaves (host ends manually)</li>
     </ul>
 
     <hr>
@@ -155,9 +164,9 @@
         <li class="done">Send disabled when empty</li>
         <li class="done">Light haptic on send</li>
         <li class="done">Field clears after send</li>
-        <li class="todo">ONE question per player per session — input locks after sending</li>
-        <li class="todo">After send: show "Your question is in" confirmation</li>
-        <li class="todo">Confirmation modal before sending — player reviews question, can edit or confirm before committing</li>
+        <li class="done">ONE question per HOST — input locks after sending, resets on seat pass</li>
+        <li class="done">After send: show "Your question is in" + "Stay connected" confirmation</li>
+        <li class="todo">Confirmation modal before sending — player reviews question before committing</li>
         <li class="todo">Trim + reject empty whitespace</li>
     </ul>
 
@@ -165,14 +174,14 @@
 
     <h2>6. Visual Design</h2>
     <ul>
-        <li class="done">Dark UI: Color(white: 0.12) background</li>
-        <li class="done">"THE SEAT" tracked uppercase, gold tone</li>
-        <li class="done">Empty seat glow: breathing animation with chair icon</li>
-        <li class="done">Full-screen question: large white text, centered, screenshot-friendly</li>
-        <li class="done">"The Seat" watermark in corner during full-screen display</li>
-        <li class="todo">Blue connection glow on player connect</li>
-        <li class="todo">Glow goes away when questions arrive, returns when empty</li>
-        <li class="todo">Queue count badge near question area</li>
+        <li class="done">Dark UI: Color(white: 0.08) background with spotlight gradient</li>
+        <li class="done">"THE SEAT" Cinzel font, tracked uppercase, gold tone, text shadow</li>
+        <li class="done">Chair image with floor shadow, easter egg gold glow on tap</li>
+        <li class="done">Full-screen question: Cinzel font, centered, tap to dismiss</li>
+        <li class="done">"The Seat" watermark during full-screen display</li>
+        <li class="done">Card stack with gold border, peek to the right</li>
+        <li class="done">Flourish decorations (ornamental gold image) above and below cards</li>
+        <li class="done">Gold glow on "Join" button when host detected</li>
         <li class="todo">Player screen polish: minimal, input is focus</li>
     </ul>
 
@@ -181,29 +190,29 @@
     <h2>7. Audio &amp; Haptics</h2>
     <ul>
         <li class="todo">Question received (host): ping + light haptic</li>
-        <li class="todo">Question sent (player): light haptic</li>
+        <li class="done">Question sent (player): light haptic</li>
         <li class="todo">Pass the Seat: medium haptic both sides</li>
         <li class="todo">Player connects: connection sound + medium haptic</li>
         <li class="todo">Question selected: light haptic</li>
         <li class="done">Audio session: <code>.playback</code> + <code>.mixWithOthers</code></li>
         <li class="todo">Custom ping sound bundled (not card flip)</li>
+        <li class="done">Easter egg: heavy haptic on chair tap</li>
     </ul>
 
     <hr>
 
     <h2>8. Pass the Seat</h2>
     <ul>
-        <li class="done">Host taps "Pass the Seat" &rarr; player list (skeleton)</li>
+        <li class="done">Host taps "Pass" &rarr; player list sheet</li>
         <li class="done">Tap name &rarr; <code>.passTheSeat</code> + <code>.youAreHost</code> sent</li>
         <li class="done">Target becomes host, original becomes player</li>
         <li class="done">Queue does NOT transfer (fresh start)</li>
         <li class="done">Connections stay alive</li>
-        <li class="todo">No confirmation dialog — verify</li>
+        <li class="done"><code>.newHost(name:)</code> broadcast to all players</li>
+        <li class="done">Player input resets on new host (hostRound counter)</li>
+        <li class="done">Toast: "[Name] is in the seat" on seat pass</li>
         <li class="todo">Medium haptic both sides</li>
-        <li class="todo">Broadcast "[Name] is in the seat" to all players (toast)</li>
-        <li class="todo">All player screens update "Connected to [host]" with new host name</li>
-        <li class="todo">Add <code>.newHost(name: String)</code> message type</li>
-        <li class="todo">Test on real devices</li>
+        <li class="todo">Test pass on real devices</li>
     </ul>
 
     <hr>
@@ -215,6 +224,7 @@
         <li class="done">Player resumes &rarr; restart browser, auto-reconnect</li>
         <li class="done">Host resumes &rarr; session gone, back to solo</li>
         <li class="done">"End Session" = same as backgrounding</li>
+        <li class="done">Player returns to solo on host disconnect</li>
         <li class="todo">Idle timer disabled while active</li>
         <li class="todo">Test background/resume on real devices</li>
     </ul>
@@ -240,45 +250,35 @@
 
     <h2>13. Solo Mode: Would You Answer?</h2>
     <ul>
-        <li class="plain">Random questions appear one at a time from a curated pool</li>
-        <li class="plain">Swipe right = "I'd answer that" &rarr; streak increments</li>
-        <li class="plain">Swipe left = "Pass" &rarr; streak resets to 0</li>
-        <li class="plain">Streak counter visible (same &#128293; pattern as HCF Higher/Lower)</li>
-        <li class="plain">Best streak persists via @AppStorage("bestStreak") — shown next to streak, invisible when 0</li>
-        <li class="plain">Question pool: mix of funny, awkward, deep, absurd questions (100+ to start)</li>
-        <li class="plain">Questions don't repeat until pool is exhausted, then reshuffles</li>
-        <li class="plain">Tap the chair/glow to start — transitions from solo branding to game mode</li>
-        <li class="plain">Light haptic on swipe</li>
-        <li class="plain">Teaches the core mechanic: you're in the seat, deciding what to answer</li>
-        <li class="plain">No timer, no pressure — play at your own pace</li>
-        <li class="plain">Available in solo state only (hidden when hosting or connected as player)</li>
+        <li class="todo">Random questions from curated pool</li>
+        <li class="todo">Swipe right = "I'd answer that" &rarr; streak increments</li>
+        <li class="todo">Swipe left = "Pass" &rarr; streak resets to 0</li>
+        <li class="todo">Streak counter + best streak</li>
+        <li class="todo">Question pool (100+ questions)</li>
+        <li class="todo">Tap chair to start</li>
     </ul>
 
     <hr>
 
-    <h2>12. Open Questions (decisions needed)</h2>
+    <h2>12. Open Questions (decisions made)</h2>
     <ul>
-        <li class="todo">No going back to previous questions (proposal: no)</li>
-        <li class="todo">Players see current question? (specced but optional — currently implemented)</li>
-        <li class="todo">Host sees who asked? (proposal: no, full anonymity — currently implemented as anonymous)</li>
-        <li class="todo">Empty queue state (proposal: glow + "Waiting for questions..." — currently implemented)</li>
-        <li class="todo">Multiple questions from same player (proposal: yes, no throttle — currently no restriction)</li>
+        <li class="done">No going back to previous questions — swipe cycles, nothing deleted</li>
+        <li class="done">Players see current question (shared screen moment)</li>
+        <li class="done">Host does NOT see who asked (full anonymity)</li>
+        <li class="done">Empty queue: glow + "Waiting for questions..."</li>
+        <li class="done">One question per host (not unlimited)</li>
     </ul>
 
     <hr>
 
     <h2>Debug: Simulated Characters</h2>
     <ul>
-        <li class="todo">Add simulated players behind <code>#if DEBUG</code> (e.g., "Charlie", "Lucy", "Schroeder")</li>
-        <li class="todo">Simulated players auto-join with name + fake device ID</li>
-        <li class="todo">Appear in connectedPeers list and player count</li>
-        <li class="todo">Send random questions on a timer (every few seconds)</li>
-        <li class="todo">Valid targets for "Pass the Seat"</li>
-        <li class="todo">Question pool: mix of funny/awkward/random questions for realistic testing</li>
-        <li class="todo">Brian says "enable characters" &rarr; uncomment simulated players</li>
-        <li class="todo">Brian says "disable characters" or "two phone mode" &rarr; comment them out</li>
-        <li class="todo">Do NOT connect a second phone while simulated characters are enabled</li>
-        <li class="todo">Production/Release builds: no simulated characters (behind <code>#if DEBUG</code>)</li>
+        <li class="done">Add simulated players behind <code>#if DEBUG</code> (Charlie, Lucy, Schroeder)</li>
+        <li class="done">Appear in connectedPeers list and player count</li>
+        <li class="done">Each sends one random question (staggered 2s/4s/6s)</li>
+        <li class="done">Valid targets for "Pass the Seat"</li>
+        <li class="done">Question pool: PG-13 funny/awkward questions</li>
+        <li class="done">Production/Release builds: no simulated characters (behind <code>#if DEBUG</code>)</li>
     </ul>
 
 </body>

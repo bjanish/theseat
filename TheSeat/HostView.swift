@@ -123,6 +123,15 @@ struct HostView: View {
                 .opacity(0.7)
                 .rotationEffect(.degrees(180))
                 .offset(y: 210)
+
+            // Instructions
+            VStack {
+                Spacer()
+                Text("swipe to browse · tap to choose")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.3))
+                    .padding(.bottom, 30)
+            }
         }
         .padding(.top, 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

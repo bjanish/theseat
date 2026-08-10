@@ -80,10 +80,66 @@ final class SessionManager {
         startListener()
         #if DEBUG
         print("[HOST] Started hosting session")
+        startSimulatedCharacters()
         #endif
     }
 
+    // MARK: - Simulated Characters (DEBUG only)
+
+    #if DEBUG
+    @ObservationIgnored private var characterNames = ["Charlie", "Lucy", "Schroeder"]
+    private let characterQuestions = [
+        "What's your most embarrassing moment?",
+        "If you could be anyone for a day, who?",
+        "What's the worst advice you've ever given?",
+        "What do you think about when you can't sleep?",
+        "If you had to delete one app, which one?",
+        "What's something you pretend to like but don't?",
+        "Who in this room would survive a zombie apocalypse?",
+        "What's the dumbest thing you've ever spent money on?",
+        "If your life was a movie, what would the title be?",
+        "What's a hill you'll die on?",
+        "If you could uninvent one thing, what would it be?",
+        "What's your guilty pleasure?",
+        "Who was your first celebrity crush?",
+        "If you could only eat one food forever, what is it?",
+        "What's something you're terrible at but love doing?",
+        "What's the best compliment you've ever received?",
+        "If you won the lottery tomorrow, what's the first thing you'd do?",
+        "What's a movie you can watch over and over?",
+        "What's the longest you've gone without sleep?",
+        "If you could have dinner with anyone, living or dead, who?"
+    ]
+
+    private func startSimulatedCharacters() {
+        // Add characters as connected peers
+        for name in characterNames {
+            connectedPeers.append(name)
+        }
+        showToast("\(characterNames.count) characters joined")
+
+        // Each character sends one question with a slight delay between them
+        let shuffled = characterQuestions.shuffled()
+        for (index, name) in characterNames.enumerated() {
+            let delay = Double(index + 1) * 2.0
+            let question = shuffled[index]
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self, self.role == .host else { return }
+                self.questionQueue.append(question)
+                print("[CHARACTER] \(name) sent: \(question.prefix(30))...")
+            }
+        }
+    }
+
+    private func stopSimulatedCharacters() {
+        // Nothing to stop — no timer, just one-shot delays
+    }
+    #endif
+
     func endSession() {
+        #if DEBUG
+        stopSimulatedCharacters()
+        #endif
         sendToAllPlayers(.sessionEnd)
         // Tear down after a brief moment to let the message send
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in

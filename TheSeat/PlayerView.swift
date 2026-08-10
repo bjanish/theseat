@@ -64,7 +64,7 @@ struct PlayerView: View {
 
     private func sharedQuestion(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 24, weight: .medium))
+            .font(.custom("Cinzel-Regular", size: 24))
             .foregroundStyle(.white)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 30)
@@ -73,10 +73,17 @@ struct PlayerView: View {
     // MARK: - Sent Confirmation
 
     private var sentConfirmation: some View {
-        Text("Your question is in")
-            .font(.title3)
-            .foregroundStyle(gold.opacity(0.7))
-            .padding(.bottom, 40)
+        VStack(spacing: 16) {
+            Text("Your question is in")
+                .font(.title3)
+                .foregroundStyle(gold.opacity(0.7))
+            Text("Stay connected — you'll get a new question when the seat passes")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.4))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+        }
+        .padding(.bottom, 40)
     }
 
     // MARK: - Input Area

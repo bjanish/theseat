@@ -93,17 +93,18 @@ struct ContentView: View {
                 Button {
                     sessionManager.startHosting()
                 } label: {
-                    Text("Host a Session")
+                    Text(sessionManager.hostName.isEmpty ? "Host a Session" : "\(sessionManager.hostName) is in the seat")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(sessionManager.hostName.isEmpty ? .white : .white.opacity(0.3))
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.3))
-                                .stroke(Color(red: 0.85, green: 0.70, blue: 0.40), lineWidth: 1)
+                                .fill(sessionManager.hostName.isEmpty ? Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.3) : Color.white.opacity(0.04))
+                                .stroke(sessionManager.hostName.isEmpty ? Color(red: 0.85, green: 0.70, blue: 0.40) : Color.white.opacity(0.15), lineWidth: 1)
                         )
                 }
+                .disabled(!sessionManager.hostName.isEmpty)
                 .padding(.horizontal, 40)
 
                 Button {
@@ -111,16 +112,17 @@ struct ContentView: View {
                 } label: {
                     Text(sessionManager.hostName.isEmpty ? "Join a Session" : "Join \(sessionManager.hostName)'s Session")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(sessionManager.hostName.isEmpty ? .white.opacity(0.3) : .white)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(sessionManager.hostName.isEmpty ? Color.white.opacity(0.08) : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.2))
-                                .stroke(sessionManager.hostName.isEmpty ? Color.white.opacity(0.3) : Color(red: 0.85, green: 0.70, blue: 0.40), lineWidth: 1)
+                                .fill(sessionManager.hostName.isEmpty ? Color.white.opacity(0.04) : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.2))
+                                .stroke(sessionManager.hostName.isEmpty ? Color.white.opacity(0.15) : Color(red: 0.85, green: 0.70, blue: 0.40), lineWidth: 1)
                         )
                         .shadow(color: sessionManager.hostName.isEmpty ? .clear : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.4), radius: 8)
                 }
+                .disabled(sessionManager.hostName.isEmpty)
                 .padding(.horizontal, 40)
 
                 Spacer()

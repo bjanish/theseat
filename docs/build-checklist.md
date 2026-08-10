@@ -27,8 +27,11 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Player browser finds `-host` service, auto-connects, sends `.join`
 - [x] Same-name auto-suffix ("Brian 2")
 - [x] Connection-to-name dictionary (not parallel arrays)
-- [x] Messages: join, question, currentQuestion, passTheSeat, youAreHost, sessionEnd, heartbeat
-- [ ] Test host-to-player connection on two real devices
+- [x] Messages: join, question, currentQuestion, passTheSeat, youAreHost, newHost, sessionEnd, heartbeat
+- [x] Toast system for connection events
+- [x] Browser runs passively on solo screen, shows host name on Join button
+- [x] Ghost connection timeout (3s — no .join received)
+- [ ] Test host-to-player on two real phones (second session reconnect)
 - [ ] Verify auto-reconnect after player resume from background
 
 ---
@@ -37,22 +40,29 @@ Spec order = build order. Each section done-done before moving to the next.
 
 - [x] Name entry: text field, persists UserDefaults, first launch only
 - [x] Solo: seat glow + "THE SEAT" branding + Host/Join buttons
-- [x] Host: question display, queue count, swipe left skip, swipe right show, end session, player count
-- [x] Player: text input, send button, 150-char counter, "Connected to [host]", leave button
+- [x] Solo: spotlight effect, Cinzel font, tagline on appear
+- [x] Solo: "Join [host name]'s Session" button with gold glow when host detected
+- [x] Host: card stack with gold border, Cinzel font, swipe left/right to cycle, tap to choose
+- [x] Host: flourish decorations above and below cards
+- [x] Host: "swipe to browse · tap to choose" instruction
+- [x] Host: full-screen question display in Cinzel, tap to dismiss
+- [x] Host: Pass button, End button in top bar
+- [x] Player: text input with gold underline, 150-char counter, send button
+- [x] Player: "Your question is in" + "Stay connected" after sending
+- [x] Player: shared question display (Cinzel) when host selects a question
+- [x] Player: Leave button
 - [ ] Settings accessible from solo screen
-- [ ] Solo ↔ Host toggle (spec says toggle pattern like HCF, currently using buttons)
 
 ---
 
 ## 4. Host Queue Behavior
 
 - [x] FIFO array
-- [x] Swipe left = skip (gone forever)
-- [x] Swipe right/tap = select (full-screen, sent as `.currentQuestion`)
-- [ ] No undo on skip — verify behavior
+- [x] Swipe left/right = cycle through questions (nothing deleted)
+- [x] Tap = select (full-screen, sent as `.currentQuestion`)
 - [x] Queue persists during session
 - [x] No duplicate detection on question text
-- [ ] Test with multiple rapid questions
+- [x] Host session stays live after last player leaves (host ends manually)
 
 ---
 
@@ -64,23 +74,23 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Send disabled when empty
 - [x] Light haptic on send
 - [x] Field clears after send
-- [ ] ONE question per player per session — input locks after sending
-- [ ] After send: show "Your question is in" confirmation
-- [ ] Confirmation modal before sending — player reviews question, can edit or confirm before committing
+- [x] ONE question per HOST — input locks after sending, resets on seat pass
+- [x] After send: show "Your question is in" + "Stay connected" confirmation
+- [ ] Confirmation modal before sending — player reviews question before committing
 - [ ] Trim + reject empty whitespace
 
 ---
 
 ## 6. Visual Design
 
-- [x] Dark UI: Color(white: 0.12) background
-- [x] "THE SEAT" tracked uppercase, gold tone
-- [x] Empty seat glow: breathing animation with chair icon
-- [x] Full-screen question: large white text, centered, screenshot-friendly
-- [x] "The Seat" watermark in corner during full-screen display
-- [ ] Blue connection glow on player connect
-- [ ] Glow goes away when questions arrive, returns when empty
-- [ ] Queue count badge near question area
+- [x] Dark UI: Color(white: 0.08) background with spotlight gradient
+- [x] "THE SEAT" Cinzel font, tracked uppercase, gold tone, text shadow
+- [x] Chair image with floor shadow, easter egg gold glow on tap
+- [x] Full-screen question: Cinzel font, centered, tap to dismiss
+- [x] "The Seat" watermark during full-screen display
+- [x] Card stack with gold border, peek to the right
+- [x] Flourish decorations (ornamental gold image) above and below cards
+- [x] Gold glow on "Join" button when host detected
 - [ ] Player screen polish: minimal, input is focus
 
 ---
@@ -88,28 +98,28 @@ Spec order = build order. Each section done-done before moving to the next.
 ## 7. Audio & Haptics
 
 - [ ] Question received (host): ping + light haptic
-- [ ] Question sent (player): light haptic
+- [x] Question sent (player): light haptic
 - [ ] Pass the Seat: medium haptic both sides
 - [ ] Player connects: connection sound + medium haptic
 - [ ] Question selected: light haptic
 - [x] Audio session: `.playback` + `.mixWithOthers`
 - [ ] Custom ping sound bundled (not card flip)
+- [x] Easter egg: heavy haptic on chair tap
 
 ---
 
 ## 8. Pass the Seat
 
-- [x] Host taps "Pass the Seat" → player list (skeleton)
+- [x] Host taps "Pass" → player list sheet
 - [x] Tap name → `.passTheSeat` + `.youAreHost` sent
 - [x] Target becomes host, original becomes player
 - [x] Queue does NOT transfer (fresh start)
 - [x] Connections stay alive
-- [ ] No confirmation dialog — verify
+- [x] `.newHost(name:)` broadcast to all players
+- [x] Player input resets on new host (hostRound counter)
+- [x] Toast: "[Name] is in the seat" on seat pass
 - [ ] Medium haptic both sides
-- [ ] Broadcast "[Name] is in the seat" to all players (toast)
-- [ ] All player screens update "Connected to [host]" with new host name
-- [ ] Add `.newHost(name: String)` message type
-- [ ] Test on real devices
+- [ ] Test pass on real devices
 
 ---
 
@@ -120,6 +130,7 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Player resumes → restart browser, auto-reconnect
 - [x] Host resumes → session gone, back to solo
 - [x] "End Session" = same as backgrounding
+- [x] Player returns to solo on host disconnect
 - [ ] Idle timer disabled while active
 - [ ] Test background/resume on real devices
 
@@ -142,40 +153,30 @@ Spec order = build order. Each section done-done before moving to the next.
 
 ## 13. Solo Mode: Would You Answer?
 
-- Random questions appear one at a time from a curated pool
-- Swipe right = "I'd answer that" → streak increments
-- Swipe left = "Pass" → streak resets to 0
-- Streak counter visible (same 🔥 pattern as HCF Higher/Lower)
-- Best streak persists via @AppStorage("bestStreak") — shown next to streak, invisible when 0
-- Question pool: mix of funny, awkward, deep, absurd questions (100+ to start)
-- Questions don't repeat until pool is exhausted, then reshuffles
-- Tap the chair/glow to start — transitions from solo branding to game mode
-- Light haptic on swipe
-- Teaches the core mechanic: you're in the seat, deciding what to answer
-- No timer, no pressure — play at your own pace
-- Available in solo state only (hidden when hosting or connected as player)
+- [ ] Random questions from curated pool
+- [ ] Swipe right = "I'd answer that" → streak increments
+- [ ] Swipe left = "Pass" → streak resets to 0
+- [ ] Streak counter + best streak
+- [ ] Question pool (100+ questions)
+- [ ] Tap chair to start
 
 ---
 
-## 12. Open Questions (decisions needed)
+## 12. Open Questions (decisions made)
 
-- [ ] No going back to previous questions (proposal: no)
-- [ ] Players see current question? (specced but optional — currently implemented)
-- [ ] Host sees who asked? (proposal: no, full anonymity — currently implemented as anonymous)
-- [ ] Empty queue state (proposal: glow + "Waiting for questions..." — currently implemented)
-- [ ] Multiple questions from same player (proposal: yes, no throttle — currently no restriction)
+- [x] No going back to previous questions — swipe cycles, nothing deleted
+- [x] Players see current question (shared screen moment)
+- [x] Host does NOT see who asked (full anonymity)
+- [x] Empty queue: glow + "Waiting for questions..."
+- [x] One question per host (not unlimited)
 
 ---
 
 ## Debug: Simulated Characters
 
-- [ ] Add simulated players behind `#if DEBUG` (e.g., "Charlie", "Lucy", "Schroeder")
-- [ ] Simulated players auto-join with name + fake device ID
-- [ ] Appear in connectedPeers list and player count
-- [ ] Send random questions on a timer (every few seconds)
-- [ ] Valid targets for "Pass the Seat"
-- [ ] Question pool: mix of funny/awkward/random questions for realistic testing
-- [ ] Brian says "enable characters" → uncomment simulated players
-- [ ] Brian says "disable characters" or "two phone mode" → comment them out
-- [ ] Do NOT connect a second phone while simulated characters are enabled
-- [ ] Production/Release builds: no simulated characters (behind `#if DEBUG`)
+- [x] Add simulated players behind `#if DEBUG` (Charlie, Lucy, Schroeder)
+- [x] Appear in connectedPeers list and player count
+- [x] Each sends one random question (staggered 2s/4s/6s)
+- [x] Valid targets for "Pass the Seat"
+- [x] Question pool: PG-13 funny/awkward questions
+- [x] Production/Release builds: no simulated characters (behind `#if DEBUG`)
