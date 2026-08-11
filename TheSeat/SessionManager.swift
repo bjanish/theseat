@@ -23,8 +23,8 @@ final class SessionManager {
     var hostRound: Int = 0
     var toast: ToastMessage?
 
-    func showToast(_ message: String, duration: Double = 3.0) {
-        let newToast = ToastMessage(text: message, duration: duration)
+    func showToast(_ message: String, duration: Double = 3.0, position: ToastPosition = .top) {
+        let newToast = ToastMessage(text: message, duration: duration, position: position)
         toast = newToast
         let toastId = newToast.id
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
@@ -146,7 +146,7 @@ final class SessionManager {
             self?.tearDown()
             self?.role = .solo
             self?.announcedHosts = []
-            self?.showToast("Session ended")
+            self?.showToast("Session ended", position: .center)
             // Restart browser after delay so other phones can see future hosts
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 self?.startBrowser()
@@ -159,7 +159,7 @@ final class SessionManager {
 
     func selectQuestion(at index: Int) {
         guard index < questionQueue.count else { return }
-        let question = questionQueue.remove(at: index)
+        let question = questionQueue[index]
         currentDisplayedQuestion = question
         sendToAllPlayers(.currentQuestion(text: question))
     }
@@ -537,7 +537,7 @@ final class SessionManager {
                 role = .solo
                 hostName = ""
                 currentDisplayedQuestion = nil
-                showToast("Session ended")
+                showToast("Session ended", position: .center)
                 reconnectAttempts += 1
                 startBrowser()
             }
@@ -605,7 +605,7 @@ final class SessionManager {
                 role = .solo
                 hostName = ""
                 currentDisplayedQuestion = nil
-                showToast("Session ended")
+                showToast("Session ended", position: .center)
                 reconnectAttempts = 0
                 lastLeftHostName = nil
                 startBrowser()

@@ -99,11 +99,11 @@ struct HostView: View {
 
                 ZStack {
                     ForEach(Array(sessionManager.questionQueue.enumerated().reversed()), id: \.offset) { index, question in
-                        if index < 3 {
+                        if index < 2 {
                             questionCard(question)
                                 .offset(x: CGFloat(index) * 20)
                                 .scaleEffect(1.0 - CGFloat(index) * 0.05)
-                                .opacity(index == 0 ? 1.0 : 0.5)
+                                .opacity(index == 0 ? 1.0 : 0.7)
                                 .zIndex(Double(sessionManager.questionQueue.count - index))
                                 .offset(x: index == 0 ? dragOffset.width : 0)
                                 .rotationEffect(index == 0 ? .degrees(Double(dragOffset.width) / 20) : .zero)
@@ -151,7 +151,7 @@ struct HostView: View {
         .frame(height: 280)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(white: 0.14))
+                .fill(Color(white: 0.12))
                 .stroke(gold.opacity(0.4), lineWidth: 1)
         )
         .padding(.horizontal, 30)
@@ -200,15 +200,11 @@ struct HostView: View {
 
     private func fullScreenQuestion(_ question: String) -> some View {
         ZStack {
-            // Tap to dismiss
             Color.clear
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        sessionManager.currentDisplayedQuestion = nil
-                    }
-                }
-
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay {
             VStack {
                 Spacer()
 
@@ -226,9 +222,14 @@ struct HostView: View {
                     .foregroundStyle(.white.opacity(0.2))
                     .padding(.bottom, 20)
             }
-            .transition(.opacity.combined(with: .scale(scale: 0.95)))
         }
-        .animation(.easeIn(duration: 0.4), value: sessionManager.currentDisplayedQuestion)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeOut(duration: 0.3)) {
+                sessionManager.currentDisplayedQuestion = nil
+            }
+        }
+        .transition(.opacity.combined(with: .scale(scale: 0.95)))
     }
 
     // MARK: - Pass the Seat Sheet

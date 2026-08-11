@@ -20,6 +20,12 @@ struct ToastView: View {
     }
 }
 
+enum ToastPosition {
+    case top
+    case center
+    case bottom
+}
+
 struct ToastModifier: ViewModifier {
     @Binding var toast: ToastMessage?
 
@@ -28,12 +34,25 @@ struct ToastModifier: ViewModifier {
             content
 
             if let toast {
-                VStack {
-                    ToastView(message: toast.text, borderColor: toast.borderColor)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                    Spacer()
+                Group {
+                    switch toast.position {
+                    case .top:
+                        VStack {
+                            ToastView(message: toast.text, borderColor: toast.borderColor)
+                                .padding(.top, 60)
+                            Spacer()
+                        }
+                    case .center:
+                        ToastView(message: toast.text, borderColor: toast.borderColor)
+                    case .bottom:
+                        VStack {
+                            Spacer()
+                            ToastView(message: toast.text, borderColor: toast.borderColor)
+                                .padding(.bottom, 80)
+                        }
+                    }
                 }
-                .padding(.top, 10)
+                .transition(.opacity)
                 .id(toast.id)
                 .animation(.easeInOut(duration: 0.3), value: self.toast)
             }
@@ -46,6 +65,7 @@ struct ToastMessage: Equatable, Identifiable {
     let text: String
     var borderColor: Color = Color(red: 0.85, green: 0.70, blue: 0.40)
     var duration: Double = 3.0
+    var position: ToastPosition = .top
 
     static func == (lhs: ToastMessage, rhs: ToastMessage) -> Bool {
         lhs.id == rhs.id
