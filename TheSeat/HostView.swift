@@ -129,10 +129,11 @@ struct HostView: View {
                     .opacity(0.7)
                     .rotationEffect(.degrees(180))
             }
+            .offset(y: -9.3)
 
             Spacer()
 
-            // Instructions pinned to bottom
+            // Instructions pinned to bottom as baseline
             Text("swipe to browse · tap to choose")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.3))
