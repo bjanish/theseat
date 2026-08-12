@@ -51,14 +51,17 @@
 # Build Checklist Standard (All Projects)
 
 - Every project gets a `docs/build-checklist.html` as a project dashboard
-- Template: dark theme (#080808), Cinzel headers with gold shimmer animation, Inter body font
+- Template: dark theme (#080808), Cinzel headers with gold shimmer animation, Inter body font (weight 350, line-height 2.0)
 - Stats dashboard at top (Done / Remaining / Sections counts)
 - Blue progress bar with percentage
 - Gold gradient dividers between sections
-- Section counts (done/total) on each heading
+- Section counts (done/total) on each heading with gold mini progress bars
 - Green checkmarks for done, gray circles for todo
 - Hover animations (translateX slide)
+- Staggered fade-in animation on list items (30ms delay per item)
+- Section collapse/expand on heading click
 - Flourish ornaments in header and footer
 - Google Fonts loaded (Cinzel + Inter)
+- Tighter letter-spacing (2px) on section headings
 - When adding to build-checklist.md, ALWAYS update build-checklist.html to match
 - When checking off or adding items, ALWAYS recount done/remaining from the .md file and update the HTML stats (Done number, Remaining number, Sections number, progress bar width, progress percentage). Never guess — always grep -c to get accurate counts.

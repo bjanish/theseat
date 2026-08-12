@@ -7,7 +7,55 @@
     <title>The Seat — Build Checklist</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;350;400;500;600&display=swap');
+
+        :root {
+            --bg: #080808;
+            --bg-card: rgba(255, 255, 255, 0.01);
+            --bg-hover: rgba(255, 255, 255, 0.02);
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --text-faint: #555;
+            --text-fainter: #444;
+            --text-faintest: #333;
+            --gold: #d4a84b;
+            --gold-light: #f0d78c;
+            --green: #7ed87e;
+            --green-dark: #5cb85c;
+            --border: #1a1a1a;
+            --border-light: #2a2a2a;
+            --code-bg: rgba(212, 168, 75, 0.08);
+            --code-border: rgba(212, 168, 75, 0.15);
+            --divider: rgba(212, 168, 75, 0.2);
+            --glow: rgba(212, 168, 75, 0.06);
+            --section-bar-bg: #1a1a1a;
+            --done-border: rgba(126, 216, 126, 0.3);
+            --todo-hover-border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --bg: #d9d0c2;
+            --bg-card: rgba(0, 0, 0, 0.03);
+            --bg-hover: rgba(0, 0, 0, 0.04);
+            --text: #2a2a2a;
+            --text-muted: #555;
+            --text-faint: #777;
+            --text-fainter: #999;
+            --text-faintest: #bbb;
+            --gold: #8b6914;
+            --gold-light: #a67d1a;
+            --green: #1a5c2e;
+            --green-dark: #0f3d1c;
+            --border: #d4cbbe;
+            --border-light: #c8bfb0;
+            --code-bg: rgba(122, 92, 31, 0.08);
+            --code-border: rgba(122, 92, 31, 0.2);
+            --divider: rgba(122, 92, 31, 0.25);
+            --glow: rgba(122, 92, 31, 0.04);
+            --section-bar-bg: #d4cbbe;
+            --done-border: rgba(61, 140, 61, 0.3);
+            --todo-hover-border: rgba(0, 0, 0, 0.1);
+        }
 
         * {
             margin: 0;
@@ -16,16 +64,17 @@
         }
 
         body {
-            background: #080808;
-            color: #e0e0e0;
+            background: var(--bg);
+            color: var(--text);
             font-family: 'Inter', -apple-system, sans-serif;
             font-size: 14px;
-            font-weight: 300;
-            line-height: 1.8;
+            font-weight: 350;
+            line-height: 2.0;
             padding: 80px 40px;
             max-width: 900px;
             margin: 0 auto;
             position: relative;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         body::before {
@@ -35,7 +84,7 @@
             left: 0;
             right: 0;
             height: 300px;
-            background: radial-gradient(ellipse at 50% 0%, rgba(212, 168, 75, 0.06) 0%, transparent 70%);
+            background: radial-gradient(ellipse at 50% 0%, var(--glow) 0%, transparent 70%);
             pointer-events: none;
             z-index: -1;
         }
@@ -50,18 +99,40 @@
             font-family: 'Cinzel', Georgia, serif;
             font-size: 38px;
             font-weight: 400;
-            color: #d4a84b;
+            color: var(--gold);
             letter-spacing: 6px;
             text-transform: uppercase;
             margin-bottom: 8px;
-            text-shadow: 0 0 40px rgba(212, 168, 75, 0.15);
         }
 
         .subtitle {
             font-size: 12px;
-            color: #555;
+            color: var(--text-faint);
             letter-spacing: 3px;
             text-transform: uppercase;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: var(--border);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--gold);
         }
 
         .progress-container {
@@ -75,10 +146,10 @@
         .progress-bar {
             width: 200px;
             height: 6px;
-            background: #1a1a1a;
+            background: var(--section-bar-bg);
             border-radius: 3px;
             overflow: hidden;
-            border: 1px solid #2a2a2a;
+            border: 1px solid var(--border-light);
         }
 
         .progress-fill {
@@ -87,6 +158,19 @@
             border-radius: 3px;
             transition: width 0.6s ease;
             box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
+            animation: progressPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes progressPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 12px rgba(74, 158, 255, 0.5), 0 0 4px rgba(74, 158, 255, 0.8);
+            }
+
+            50% {
+                box-shadow: 0 0 24px rgba(74, 158, 255, 0.8), 0 0 40px rgba(74, 158, 255, 0.4), 0 0 6px rgba(74, 158, 255, 1);
+            }
         }
 
         .progress-text {
@@ -100,24 +184,63 @@
             font-family: 'Cinzel', Georgia, serif;
             font-size: 15px;
             font-weight: 400;
-            color: #d4a84b;
-            letter-spacing: 3px;
+            color: var(--gold);
+            letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 56px;
             margin-bottom: 20px;
             padding-bottom: 12px;
-            border-bottom: 1px solid rgba(212, 168, 75, 0.15);
+            border-bottom: 1px solid var(--code-border);
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        h2:hover {
+            color: var(--gold-light);
+        }
+
+        .section-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .section-count {
             font-family: 'Inter', sans-serif;
             font-size: 11px;
-            color: #444;
+            color: var(--text-fainter);
             font-weight: 400;
             letter-spacing: 0;
+        }
+
+        .section-bar {
+            width: 60px;
+            height: 4px;
+            background: var(--section-bar-bg);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .section-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+
+        .section-content {
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
         }
 
         ul {
@@ -131,64 +254,74 @@
             border-radius: 8px;
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
+            opacity: 0;
+            transform: translateX(-8px);
+            animation: fadeIn 0.3s ease forwards;
         }
 
         li:hover {
-            background: rgba(255, 255, 255, 0.02);
+            background: var(--bg-hover);
             transform: translateX(4px);
         }
 
         li.done {
-            color: #7ed87e;
-            border-left-color: rgba(126, 216, 126, 0.3);
+            color: var(--green);
+            border-left-color: var(--done-border);
         }
 
         li.done::before {
             content: "✓";
             display: inline-block;
             width: 24px;
-            color: #5cb85c;
+            color: var(--green-dark);
             font-weight: 600;
             font-size: 13px;
         }
 
         li.todo {
-            color: #888;
+            color: var(--text-muted);
         }
 
         li.todo::before {
             content: "○";
             display: inline-block;
             width: 24px;
-            color: #444;
+            color: var(--text-fainter);
             font-size: 12px;
         }
 
         li.todo:hover {
-            color: #aaa;
-            border-left-color: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border-left-color: var(--todo-hover-border);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         code {
             font-family: 'SF Mono', 'JetBrains Mono', monospace;
             font-size: 11px;
-            background: rgba(212, 168, 75, 0.08);
-            color: #d4a84b;
+            background: var(--code-bg);
+            color: var(--gold);
             padding: 3px 8px;
             border-radius: 4px;
-            border: 1px solid rgba(212, 168, 75, 0.15);
+            border: 1px solid var(--code-border);
         }
 
         .divider {
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(212, 168, 75, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, var(--divider), transparent);
             margin: 48px 0;
         }
 
         footer {
             margin-top: 80px;
             padding-top: 30px;
-            border-top: 1px solid #1a1a1a;
+            border-top: 1px solid var(--border);
             text-align: center;
             position: relative;
         }
@@ -200,14 +333,14 @@
             left: 50%;
             transform: translateX(-50%) rotate(180deg);
             font-size: 18px;
-            color: rgba(212, 168, 75, 0.2);
-            background: #080808;
+            color: var(--divider);
+            background: var(--bg);
             padding: 0 16px;
         }
 
         .footer-text {
             font-size: 11px;
-            color: #333;
+            color: var(--text-faintest);
             letter-spacing: 2px;
             text-transform: uppercase;
         }
@@ -218,8 +351,8 @@
             gap: 40px;
             margin-top: 40px;
             padding: 24px;
-            background: rgba(255, 255, 255, 0.01);
-            border: 1px solid #1a1a1a;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 12px;
         }
 
@@ -230,13 +363,13 @@
         .stat-number {
             font-family: 'Cinzel', serif;
             font-size: 28px;
-            color: #d4a84b;
+            color: var(--gold);
             display: block;
         }
 
         .stat-label {
             font-size: 10px;
-            color: #555;
+            color: var(--text-faint);
             letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 4px;
@@ -260,10 +393,70 @@
             background-clip: text;
             animation: shimmer 8s linear infinite;
         }
+
+        [data-theme="light"] h1 {
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: var(--gold);
+            background-clip: unset;
+            animation: none;
+        }
+
+        [data-theme="light"] .progress-fill {
+            background: linear-gradient(90deg, #1a3a6b, #2a5298);
+            box-shadow: 0 0 8px rgba(26, 58, 107, 0.4);
+            animation: none;
+        }
+
+        [data-theme="light"] .progress-text {
+            color: #1a3a6b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-left: 20px;
+        }
+
+        table th {
+            text-align: left;
+            padding: 8px 12px;
+            color: var(--gold);
+            font-weight: 400;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        table td {
+            padding: 8px 12px;
+            color: var(--text-muted);
+        }
+
+        table tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        table tr:last-child {
+            border-bottom: none;
+        }
+
+        h3.toast-heading {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            padding-left: 20px;
+        }
     </style>
 </head>
 
 <body>
+
+    <div class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀️</div>
 
     <div class="header">
         <img src="chair.png" style="width: 140px; margin-bottom: 16px; opacity: 0.9;">
@@ -282,296 +475,420 @@
         </div>
     </div>
 
-    <h2>1. Tech Stack &amp; File Structure <span class="section-count">6/6</span></h2>
-    <ul>
-        <li class="done">SwiftUI + Network framework + AVFoundation</li>
-        <li class="done">@MainActor @Observable SessionManager</li>
-        <li class="done">SeatMessage in separate file</li>
-        <li class="done"><code>#if DEBUG</code> for all test infrastructure</li>
-        <li class="done">Bundle ID: com.bjanish.askme</li>
-        <li class="done">App icon: ornate chair, dark background, gold tone, spotlight</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">1. Tech Stack &amp; File Structure <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">6/6</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">SwiftUI + Network framework + AVFoundation</li>
+            <li class="done">@MainActor @Observable SessionManager</li>
+            <li class="done">SeatMessage in separate file</li>
+            <li class="done"><code>#if DEBUG</code> for all test infrastructure</li>
+            <li class="done">Bundle ID: com.bjanish.askme</li>
+            <li class="done">App icon: ornate chair, dark background, gold tone, spotlight</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>2. Networking <span class="section-count">14/17</span></h2>
-    <ul>
-        <li class="done">NWBrowser + NWListener + NWConnection, <code>includePeerToPeer = true</code></li>
-        <li class="done">Service type: <code>_theseat._tcp</code></li>
-        <li class="done">Service name: <code>playerName-deviceID-host</code> or <code>playerName-deviceID</code></li>
-        <li class="done">6-char UUID device ID in UserDefaults</li>
-        <li class="done">Self-filter, endpoint dedup, device ID dedup</li>
-        <li class="done">Connection timeout (3s), circuit breaker (3 attempts)</li>
-        <li class="done">Host starts listener, accepts connections</li>
-        <li class="done">Player browser finds <code>-host</code> service, auto-connects, sends <code>.join</code></li>
-        <li class="done">Same-name auto-suffix ("Brian 2")</li>
-        <li class="done">Connection-to-name dictionary (not parallel arrays)</li>
-        <li class="done">Messages: join, question, currentQuestion, passTheSeat, youAreHost, newHost, sessionEnd, heartbeat</li>
-        <li class="done">Toast system for connection events</li>
-        <li class="done">Browser runs passively on solo screen, shows host name on Join button</li>
-        <li class="done">Ghost connection timeout (3s — no .join received)</li>
-        <li class="todo">Test host-to-player on two real phones (second session reconnect)</li>
-        <li class="todo">Verify auto-reconnect after player resume from background</li>
-        <li class="todo">Test without WiFi (AWDL peer-to-peer only)</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">2. Networking <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 82%"></span></span><span class="section-count">14/17</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">NWBrowser + NWListener + NWConnection, <code>includePeerToPeer = true</code></li>
+            <li class="done">Service type: <code>_theseat._tcp</code></li>
+            <li class="done">Service name: <code>playerName-deviceID-host</code> or <code>playerName-deviceID</code></li>
+            <li class="done">6-char UUID device ID in UserDefaults</li>
+            <li class="done">Self-filter, endpoint dedup, device ID dedup</li>
+            <li class="done">Connection timeout (3s), circuit breaker (3 attempts)</li>
+            <li class="done">Host starts listener, accepts connections</li>
+            <li class="done">Player browser finds <code>-host</code> service, auto-connects, sends <code>.join</code></li>
+            <li class="done">Same-name auto-suffix ("Brian 2")</li>
+            <li class="done">Connection-to-name dictionary (not parallel arrays)</li>
+            <li class="done">Messages: join, question, currentQuestion, passTheSeat, youAreHost, newHost, sessionEnd, heartbeat</li>
+            <li class="done">Toast system for connection events</li>
+            <li class="done">Browser runs passively on solo screen, shows host name on Join button</li>
+            <li class="done">Ghost connection timeout (3s — no .join received)</li>
+            <li class="todo">Test host-to-player on two real phones (second session reconnect)</li>
+            <li class="todo">Verify auto-reconnect after player resume from background</li>
+            <li class="todo">Test without WiFi (AWDL peer-to-peer only)</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>3. Screens &amp; UI <span class="section-count">14/14</span></h2>
-    <ul>
-        <li class="done">Name entry: text field, persists UserDefaults, first launch only</li>
-        <li class="done">Solo: seat glow + "THE SEAT" branding + Host/Join buttons</li>
-        <li class="done">Solo: spotlight effect, Cinzel font, tagline on appear</li>
-        <li class="done">Solo: "Join [host name]" button with gold glow when host detected</li>
-        <li class="done">Host: card stack with gold border, Cinzel font, swipe left/right to cycle, tap to choose</li>
-        <li class="done">Host: flourish decorations above and below cards</li>
-        <li class="done">Host: "swipe to browse · tap to choose" instruction</li>
-        <li class="done">Host: full-screen question display in Cinzel, tap to dismiss</li>
-        <li class="done">Host: Pass button, End button in top bar</li>
-        <li class="done">Player: text input with gold underline, 150-char counter, send button</li>
-        <li class="done">Player: "Your question is in" + "Stay connected" after sending</li>
-        <li class="done">Player: shared question display (Cinzel) when host selects a question</li>
-        <li class="done">Player: Leave button</li>
-        <li class="done">Settings accessible from solo screen</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">3. Screens &amp; UI <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">14/14</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">Name entry: text field, persists UserDefaults, first launch only</li>
+            <li class="done">Solo: seat glow + "THE SEAT" branding + Host/Join buttons</li>
+            <li class="done">Solo: spotlight effect, Cinzel font, tagline on appear</li>
+            <li class="done">Solo: "Join [host name]" button with gold glow when host detected</li>
+            <li class="done">Host: card stack with gold border, Cinzel font, swipe left/right to cycle, tap to choose</li>
+            <li class="done">Host: flourish decorations above and below cards</li>
+            <li class="done">Host: "swipe to browse · tap to choose" instruction</li>
+            <li class="done">Host: full-screen question display in Cinzel, tap to dismiss</li>
+            <li class="done">Host: Pass button, End button in top bar</li>
+            <li class="done">Player: text input with gold underline, 150-char counter, send button</li>
+            <li class="done">Player: "Your question is in" + "Stay connected" after sending</li>
+            <li class="done">Player: shared question display (Cinzel) when host selects a question</li>
+            <li class="done">Player: Leave button</li>
+            <li class="done">Settings accessible from solo screen</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>4. Host Queue Behavior <span class="section-count">6/6</span></h2>
-    <ul>
-        <li class="done">FIFO array</li>
-        <li class="done">Swipe left/right = cycle through questions (nothing deleted)</li>
-        <li class="done">Tap = select (full-screen, sent as <code>.currentQuestion</code>)</li>
-        <li class="done">Queue persists during session</li>
-        <li class="done">No duplicate detection on question text</li>
-        <li class="done">Host session stays live after last player leaves (host ends manually)</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">4. Host Queue Behavior <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">6/6</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">FIFO array</li>
+            <li class="done">Swipe left/right = cycle through questions (nothing deleted)</li>
+            <li class="done">Tap = select (full-screen, sent as <code>.currentQuestion</code>)</li>
+            <li class="done">Queue persists during session</li>
+            <li class="done">No duplicate detection on question text</li>
+            <li class="done">Host session stays live after last player leaves (host ends manually)</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>5. Player Input &amp; Character Limit <span class="section-count">8/10</span></h2>
-    <ul>
-        <li class="done">150 characters max</li>
-        <li class="done">Counter shows remaining</li>
-        <li class="done">Enforced client-side (stops accepting at 150)</li>
-        <li class="done">Send disabled when empty</li>
-        <li class="done">Light haptic on send</li>
-        <li class="done">Field clears after send</li>
-        <li class="done">ONE question per HOST — input locks after sending, resets on seat pass</li>
-        <li class="done">After send: show "Your question is in" + "Stay connected" confirmation</li>
-        <li class="todo">Confirmation modal before sending — player reviews question before committing</li>
-        <li class="todo">Trim + reject empty whitespace</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">5. Player Input &amp; Character Limit <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 80%"></span></span><span class="section-count">8/10</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">150 characters max</li>
+            <li class="done">Counter shows remaining</li>
+            <li class="done">Enforced client-side (stops accepting at 150)</li>
+            <li class="done">Send disabled when empty</li>
+            <li class="done">Light haptic on send</li>
+            <li class="done">Field clears after send</li>
+            <li class="done">ONE question per HOST — input locks after sending, resets on seat pass</li>
+            <li class="done">After send: show "Your question is in" + "Stay connected" confirmation</li>
+            <li class="todo">Confirmation modal before sending — player reviews question before committing</li>
+            <li class="todo">Trim + reject empty whitespace</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>6. Visual Design <span class="section-count">8/9</span></h2>
-    <ul>
-        <li class="done">Dark UI: Color(white: 0.08) background with spotlight gradient</li>
-        <li class="done">"THE SEAT" Cinzel font, tracked uppercase, gold tone, text shadow</li>
-        <li class="done">Chair image with floor shadow, easter egg gold glow on tap</li>
-        <li class="done">Full-screen question: Cinzel font, centered, tap to dismiss</li>
-        <li class="done">"The Seat" watermark during full-screen display</li>
-        <li class="done">Card stack with gold border, peek to the right</li>
-        <li class="done">Flourish decorations (ornamental gold image) above and below cards</li>
-        <li class="done">Gold glow on "Join" button when host detected</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">6. Visual Design <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">8/8</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">Dark UI: Color(white: 0.08) background with spotlight gradient</li>
+            <li class="done">"THE SEAT" Cinzel font, tracked uppercase, gold tone, text shadow</li>
+            <li class="done">Chair image with floor shadow, easter egg gold glow on tap</li>
+            <li class="done">Full-screen question: Cinzel font, centered, tap to dismiss</li>
+            <li class="done">"The Seat" watermark during full-screen display</li>
+            <li class="done">Card stack with gold border, peek to the right</li>
+            <li class="done">Flourish decorations (ornamental gold image) above and below cards</li>
+            <li class="done">Gold glow on "Join" button when host detected</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>7. Audio &amp; Haptics <span class="section-count">3/8</span></h2>
-    <ul>
-        <li class="done">Question received (host): ping + light haptic</li>
-        <li class="done">Question sent (player): light haptic</li>
-        <li class="todo">Pass the Seat: medium haptic both sides</li>
-        <li class="todo">Player connects: connection sound + medium haptic</li>
-        <li class="todo">Question selected: light haptic</li>
-        <li class="done">Audio session: <code>.playback</code> + <code>.mixWithOthers</code></li>
-        <li class="todo">Custom ping sound bundled (not card flip)</li>
-        <li class="done">Easter egg: heavy haptic on chair tap</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">7. Audio &amp; Haptics <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 50%"></span></span><span class="section-count">4/8</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">Question received (host): ping + light haptic</li>
+            <li class="done">Question sent (player): light haptic</li>
+            <li class="todo">Pass the Seat: medium haptic both sides</li>
+            <li class="todo">Player connects: connection sound + medium haptic</li>
+            <li class="todo">Question selected: light haptic</li>
+            <li class="done">Audio session: <code>.playback</code> + <code>.mixWithOthers</code></li>
+            <li class="todo">Custom ping sound bundled (not card flip)</li>
+            <li class="done">Easter egg: heavy haptic on chair tap</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>8. Pass the Seat <span class="section-count">8/10</span></h2>
-    <ul>
-        <li class="done">Host taps "Pass" → player list sheet</li>
-        <li class="done">Tap name → <code>.passTheSeat</code> + <code>.youAreHost</code> sent</li>
-        <li class="done">Target becomes host, original becomes player</li>
-        <li class="done">Queue does NOT transfer (fresh start)</li>
-        <li class="done">Connections stay alive</li>
-        <li class="done"><code>.newHost(name:)</code> broadcast to all players</li>
-        <li class="done">Player input resets on new host (hostRound counter)</li>
-        <li class="done">Toast: "[Name] is in the seat" on seat pass</li>
-        <li class="todo">Medium haptic both sides</li>
-        <li class="todo">Test pass on real devices</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">8. Pass the Seat <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 80%"></span></span><span class="section-count">8/10</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">Host taps "Pass" → player list sheet</li>
+            <li class="done">Tap name → <code>.passTheSeat</code> + <code>.youAreHost</code> sent</li>
+            <li class="done">Target becomes host, original becomes player</li>
+            <li class="done">Queue does NOT transfer (fresh start)</li>
+            <li class="done">Connections stay alive</li>
+            <li class="done"><code>.newHost(name:)</code> broadcast to all players</li>
+            <li class="done">Player input resets on new host (hostRound counter)</li>
+            <li class="done">Toast: "[Name] is in the seat" on seat pass</li>
+            <li class="todo">Medium haptic both sides</li>
+            <li class="todo">Test pass on real devices</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>9. Lifecycle <span class="section-count">6/8</span></h2>
-    <ul>
-        <li class="done">Host backgrounds → <code>.sessionEnd</code> → teardown</li>
-        <li class="done">Player backgrounds → cancel connection + browser</li>
-        <li class="done">Player resumes → restart browser, auto-reconnect</li>
-        <li class="done">Host resumes → session gone, back to solo</li>
-        <li class="done">"End" = same as backgrounding</li>
-        <li class="done">Player returns to solo on host disconnect</li>
-        <li class="todo">Idle timer disabled while active</li>
-        <li class="todo">Test background/resume on real devices</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">9. Lifecycle <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 75%"></span></span><span class="section-count">6/8</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">Host backgrounds → <code>.sessionEnd</code> → teardown</li>
+            <li class="done">Player backgrounds → cancel connection + browser</li>
+            <li class="done">Player resumes → restart browser, auto-reconnect</li>
+            <li class="done">Host resumes → session gone, back to solo</li>
+            <li class="done">"End" = same as backgrounding</li>
+            <li class="done">Player returns to solo on host disconnect</li>
+            <li class="todo">Idle timer disabled while active</li>
+            <li class="todo">Test background/resume on real devices</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>10. Onboarding <span class="section-count">3/4</span></h2>
-    <ul>
-        <li class="done">3 slides: hero, flow, control</li>
-        <li class="done">TabView swipe pattern</li>
-        <li class="done">Local network permission mention</li>
-        <li class="todo">Polish slide content and visuals</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">10. Onboarding <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 75%"></span></span><span class="section-count">3/4</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">3 slides: hero, flow, control</li>
+            <li class="done">TabView swipe pattern</li>
+            <li class="done">Local network permission mention</li>
+            <li class="todo">Polish slide content and visuals</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>11. Paywall <span class="section-count">0/7</span></h2>
-    <ul>
-        <li class="todo">One-time $0.99 non-consumable unlock</li>
-        <li class="todo">Gate hosting after 5 free sessions</li>
-        <li class="todo">Session count increments when first player joins (not on tap)</li>
-        <li class="todo">StoreKit 2 / StoreManager (@MainActor @Observable)</li>
-        <li class="todo">Restore Purchase in Settings</li>
-        <li class="todo">Paywall UI matches app theme (gold, dark, Cinzel)</li>
-        <li class="todo"><code>paywallEnabled</code> flag behind <code>#if DEBUG</code> for testing</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">11. Paywall <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 0%"></span></span><span class="section-count">0/7</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="todo">One-time $0.99 non-consumable unlock</li>
+            <li class="todo">Gate hosting after 5 free sessions</li>
+            <li class="todo">Session count increments when first player joins (not on tap)</li>
+            <li class="todo">StoreKit 2 / StoreManager (@MainActor @Observable)</li>
+            <li class="todo">Restore Purchase in Settings</li>
+            <li class="todo">Paywall UI matches app theme (gold, dark, Cinzel)</li>
+            <li class="todo"><code>paywallEnabled</code> flag behind <code>#if DEBUG</code> for testing</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>12. Decisions Made <span class="section-count">5/5</span></h2>
-    <ul>
-        <li class="done">No going back to previous questions — swipe cycles, nothing deleted</li>
-        <li class="done">Players see current question (shared screen moment)</li>
-        <li class="done">Host does NOT see who asked (full anonymity)</li>
-        <li class="done">Empty queue: glow + "Waiting for questions..."</li>
-        <li class="done">One question per host (not unlimited)</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">12. Decisions Made <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">5/5</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">No going back to previous questions — swipe cycles, nothing deleted</li>
+            <li class="done">Players see current question (shared screen moment)</li>
+            <li class="done">Host does NOT see who asked (full anonymity)</li>
+            <li class="done">Empty queue: glow + "Waiting for questions..."</li>
+            <li class="done">One question per host (not unlimited)</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>13. Solo Mode: Would You Answer? <span class="section-count">0/6</span></h2>
-    <ul>
-        <li class="todo">Random questions from curated pool</li>
-        <li class="todo">Swipe right = "I'd answer that" → streak increments</li>
-        <li class="todo">Swipe left = "Pass" → streak resets to 0</li>
-        <li class="todo">Streak counter + best streak</li>
-        <li class="todo">Question pool (100+ questions)</li>
-        <li class="todo">Tap chair to start</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">13. Solo Mode: Would You Answer? <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 0%"></span></span><span class="section-count">0/6</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="todo">Random questions from curated pool</li>
+            <li class="todo">Swipe right = "I'd answer that" → streak increments</li>
+            <li class="todo">Swipe left = "Pass" → streak resets to 0</li>
+            <li class="todo">Streak counter + best streak</li>
+            <li class="todo">Question pool (100+ questions)</li>
+            <li class="todo">Tap chair to start</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>Debug: Simulated Characters <span class="section-count">6/6</span></h2>
-    <ul>
-        <li class="done">Add simulated players behind <code>#if DEBUG</code> (Charlie, Lucy, Schroeder)</li>
-        <li class="done">Appear in connectedPeers list and player count</li>
-        <li class="done">Each sends one random question (staggered 2s/4s/6s)</li>
-        <li class="done">Valid targets for "Pass the Seat"</li>
-        <li class="done">Question pool: PG-13 funny/awkward questions</li>
-        <li class="done">Production/Release builds: no simulated characters (behind <code>#if DEBUG</code>)</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">Debug: Simulated Characters <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">6/6</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">Add simulated players behind <code>#if DEBUG</code> (Charlie, Lucy, Schroeder)</li>
+            <li class="done">Appear in connectedPeers list and player count</li>
+            <li class="done">Each sends one random question (staggered 2s/4s/6s)</li>
+            <li class="done">Valid targets for "Pass the Seat"</li>
+            <li class="done">Question pool: PG-13 funny/awkward questions</li>
+            <li class="done">Production/Release builds: no simulated characters (behind <code>#if DEBUG</code>)</li>
+        </ul>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>Toast System <span class="section-count">6/6</span></h2>
-    <ul>
-        <li class="done">ToastView: gold-bordered pill, dark fill, subheadline weight</li>
-        <li class="done">Position via x/y fractions (0.0–1.0) — place anywhere on screen</li>
-        <li class="done"><code>.toast()</code> modifier applied per-screen (solo, host, player) — NOT at root</li>
-        <li class="done">Each screen owns its own toast positioning independently</li>
-        <li class="done">Auto-dismiss via duration (default 3s)</li>
-        <li class="done"><code>showToast(_ message:, duration:, x:, y:)</code> on SessionManager</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">Toast System <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">6/6</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">ToastView: gold-bordered pill, dark fill, subheadline weight</li>
+            <li class="done">Position via x/y fractions (0.0–1.0) — place anywhere on screen</li>
+            <li class="done"><code>.toast()</code> modifier applied per-screen (solo, host, player) — NOT at root</li>
+            <li class="done">Each screen owns its own toast positioning independently</li>
+            <li class="done">Auto-dismiss via duration (default 3s)</li>
+            <li class="done"><code>showToast(_ message:, duration:, x:, y:)</code> on SessionManager</li>
+        </ul>
 
-    <h3 style="font-family: 'Inter', sans-serif; font-size: 12px; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-top: 24px; margin-bottom: 12px; padding-left: 20px;">Current Toast Positions</h3>
-    <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-left: 20px;">
-        <thead>
-            <tr style="border-bottom: 1px solid rgba(212, 168, 75, 0.2);">
-                <th style="text-align: left; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px; letter-spacing: 1px;">TOAST</th>
-                <th style="text-align: center; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px;">X</th>
-                <th style="text-align: center; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px;">Y</th>
-                <th style="text-align: left; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px;">SCREEN</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr style="border-bottom: 1px solid #1a1a1a;">
-                <td style="padding: 8px 12px; color: #ccc;">"The Seat is empty"</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.07</td>
-                <td style="padding: 8px 12px; color: #888;">Solo</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #1a1a1a;">
-                <td style="padding: 8px 12px; color: #ccc;">"[Name] joined"</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.12</td>
-                <td style="padding: 8px 12px; color: #888;">Host</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #1a1a1a;">
-                <td style="padding: 8px 12px; color: #ccc;">"[Name] joined"</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.12</td>
-                <td style="padding: 8px 12px; color: #888;">Host</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #1a1a1a;">
-                <td style="padding: 8px 12px; color: #ccc;">"[Name] left"</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="padding: 8px 12px; color: #888;">Host</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #1a1a1a;">
-                <td style="padding: 8px 12px; color: #ccc;">"Connected" / "[host] is hosting"</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="padding: 8px 12px; color: #888;">Player</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px 12px; color: #ccc;">"[Name] is in the seat"</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
-                <td style="padding: 8px 12px; color: #888;">Player</td>
-            </tr>
-        </tbody>
-    </table>
+        <h3 class="toast-heading">Current Toast Positions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>TOAST</th>
+                    <th style="text-align: center;">X</th>
+                    <th style="text-align: center;">Y</th>
+                    <th>SCREEN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="color: #ccc;">"The Seat is empty"</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td style="text-align: center;">0.07</td>
+                    <td>Solo</td>
+                </tr>
+                <tr>
+                    <td style="color: #ccc;">"[Name] joined"</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td style="text-align: center;">0.12</td>
+                    <td>Host</td>
+                </tr>
+                <tr>
+                    <td style="color: #ccc;">"[Name] left"</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td>Host</td>
+                </tr>
+                <tr>
+                    <td style="color: #ccc;">"Connected" / "[host] is hosting"</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td>Player</td>
+                </tr>
+                <tr>
+                    <td style="color: #ccc;">"[Name] is in the seat"</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td style="text-align: center;">0.5</td>
+                    <td>Player</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <div class="divider"></div>
 
-    <h2>14. Pre-Submission <span class="section-count">0/4</span></h2>
-    <ul>
-        <li class="todo">Create privacy policy (hosted at bjanish.com/privacy)</li>
-        <li class="todo">App Store screenshots</li>
-        <li class="todo">App Store description and keywords</li>
-        <li class="todo">Review compliance (local network usage description)</li>
-    </ul>
+    <h2 onclick="toggleSection(this)">14. Pre-Submission <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 0%"></span></span><span class="section-count">0/4</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="todo">Create privacy policy (hosted at bjanish.com/privacy)</li>
+            <li class="todo">App Store screenshots</li>
+            <li class="todo">App Store description and keywords</li>
+            <li class="todo">Review compliance (local network usage description)</li>
+        </ul>
+    </div>
 
     <footer>
         <div class="footer-text">The Seat · com.bjanish.askme · v1.0</div>
     </footer>
 
+    <script>
+        // Section collapse/expand
+        function toggleSection(heading) {
+            const content = heading.nextElementSibling;
+            while (content && !content.classList.contains('section-content')) {
+                content = content.nextElementSibling;
+            }
+            if (content) {
+                content.classList.toggle('collapsed');
+            }
+        }
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('checklist-theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            themeToggle.textContent = '🌙';
+        }
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            if (current === 'light') {
+                document.documentElement.removeAttribute('data-theme');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('checklist-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('checklist-theme', 'light');
+            }
+        });
+
+        // Staggered fade-in animation for list items
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = document.querySelectorAll('li');
+            items.forEach((item, index) => {
+                item.style.animationDelay = `${index * 30}ms`;
+            });
+
+            // Dynamic pulse speed — faster as percentage increases
+            const fill = document.querySelector('.progress-fill');
+            if (fill) {
+                const width = parseFloat(fill.style.width) || 0;
+                const duration = Math.max(1.2, 4 - (width / 100) * 2.8);
+                fill.style.animationDuration = `${duration}s`;
+            }
+
+            // Confetti burst at 100%
+            const progressWidth = parseFloat(document.querySelector('.progress-fill')?.style.width) || 0;
+            if (progressWidth >= 100) {
+                launchConfetti();
+            }
+        });
+
+        // Title easter egg
+        let clickCount = 0;
+        const title = document.getElementById('title');
+        title.style.cursor = 'pointer';
+        title.addEventListener('click', () => {
+            clickCount++;
+            title.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2)';
+            title.style.transform = `rotateY(${clickCount * 360}deg)`;
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#7c4dff', '#4a9eff'];
+            const randomColor = colors[clickCount % colors.length];
+            title.style.setProperty('-webkit-text-fill-color', randomColor);
+            setTimeout(() => {
+                title.style.setProperty('-webkit-text-fill-color', 'transparent');
+            }, 600);
+        });
+
+        function launchConfetti() {
+            const colors = ['#d4a84b', '#f0d78c', '#c4943a', '#ffe6a0', '#b8860b'];
+            const container = document.body;
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement('div');
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const left = Math.random() * 100;
+                const delay = Math.random() * 1.5;
+                const duration = 2 + Math.random() * 2;
+                const size = 4 + Math.random() * 6;
+                const rotation = Math.random() * 360;
+                particle.style.cssText = `
+                    position: fixed;
+                    top: -10px;
+                    left: ${left}%;
+                    width: ${size}px;
+                    height: ${size}px;
+                    background: ${color};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+                    opacity: 0.9;
+                    pointer-events: none;
+                    z-index: 9999;
+                    transform: rotate(${rotation}deg);
+                    animation: confettiFall ${duration}s ease-in ${delay}s forwards;
+                `;
+                container.appendChild(particle);
+                setTimeout(() => particle.remove(), (delay + duration) * 1000 + 100);
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+
 </body>
 
 </html>
-
-<script>
-    let clickCount = 0;
-    const title = document.getElementById('title');
-    title.style.cursor = 'pointer';
-    title.addEventListener('click', () => {
-        clickCount++;
-        title.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2)';
-        title.style.transform = `rotateY(${clickCount * 360}deg)`;
-        const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#7c4dff', '#4a9eff'];
-        const randomColor = colors[clickCount % colors.length];
-        title.style.setProperty('-webkit-text-fill-color', randomColor);
-        setTimeout(() => {
-            title.style.setProperty('-webkit-text-fill-color', 'transparent');
-        }, 600);
-    });
-</script>

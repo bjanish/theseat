@@ -68,11 +68,11 @@ final class SessionManager {
     @ObservationIgnored private var pingPlayer: AVAudioPlayer?
 
     private func loadPingSound() {
-        Task.detached { [weak self] in
+        Task.detached {
             guard let url = Bundle.main.url(forResource: "Funk", withExtension: "aiff") else { return }
             let player = try? AVAudioPlayer(contentsOf: url)
             player?.prepareToPlay()
-            await MainActor.run {
+            await MainActor.run { [weak self] in
                 self?.pingPlayer = player
             }
         }
