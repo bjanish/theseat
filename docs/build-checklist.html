@@ -271,14 +271,14 @@
         <div class="subtitle">Build Checklist</div>
         <div class="progress-container">
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 72%"></div>
+                <div class="progress-fill" style="width: 71%"></div>
             </div>
-            <span class="progress-text">72%</span>
+            <span class="progress-text">71%</span>
         </div>
         <div class="stats">
-            <div class="stat"><span class="stat-number">75</span><span class="stat-label">Done</span></div>
-            <div class="stat"><span class="stat-number">29</span><span class="stat-label">Remaining</span></div>
-            <div class="stat"><span class="stat-number">14</span><span class="stat-label">Sections</span></div>
+            <div class="stat"><span class="stat-number">82</span><span class="stat-label">Done</span></div>
+            <div class="stat"><span class="stat-number">33</span><span class="stat-label">Remaining</span></div>
+            <div class="stat"><span class="stat-number">16</span><span class="stat-label">Sections</span></div>
         </div>
     </div>
 
@@ -317,7 +317,7 @@
 
     <div class="divider"></div>
 
-    <h2>3. Screens &amp; UI <span class="section-count">13/14</span></h2>
+    <h2>3. Screens &amp; UI <span class="section-count">14/14</span></h2>
     <ul>
         <li class="done">Name entry: text field, persists UserDefaults, first launch only</li>
         <li class="done">Solo: seat glow + "THE SEAT" branding + Host/Join buttons</li>
@@ -332,7 +332,7 @@
         <li class="done">Player: "Your question is in" + "Stay connected" after sending</li>
         <li class="done">Player: shared question display (Cinzel) when host selects a question</li>
         <li class="done">Player: Leave button</li>
-        <li class="todo">Settings accessible from solo screen</li>
+        <li class="done">Settings accessible from solo screen</li>
     </ul>
 
     <div class="divider"></div>
@@ -381,7 +381,7 @@
 
     <h2>7. Audio &amp; Haptics <span class="section-count">3/8</span></h2>
     <ul>
-        <li class="todo">Question received (host): ping + light haptic</li>
+        <li class="done">Question received (host): ping + light haptic</li>
         <li class="done">Question sent (player): light haptic</li>
         <li class="todo">Pass the Seat: medium haptic both sides</li>
         <li class="todo">Player connects: connection sound + medium haptic</li>
@@ -477,6 +477,78 @@
         <li class="done">Valid targets for "Pass the Seat"</li>
         <li class="done">Question pool: PG-13 funny/awkward questions</li>
         <li class="done">Production/Release builds: no simulated characters (behind <code>#if DEBUG</code>)</li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <h2>Toast System <span class="section-count">6/6</span></h2>
+    <ul>
+        <li class="done">ToastView: gold-bordered pill, dark fill, subheadline weight</li>
+        <li class="done">Position via x/y fractions (0.0–1.0) — place anywhere on screen</li>
+        <li class="done"><code>.toast()</code> modifier applied per-screen (solo, host, player) — NOT at root</li>
+        <li class="done">Each screen owns its own toast positioning independently</li>
+        <li class="done">Auto-dismiss via duration (default 3s)</li>
+        <li class="done"><code>showToast(_ message:, duration:, x:, y:)</code> on SessionManager</li>
+    </ul>
+
+    <h3 style="font-family: 'Inter', sans-serif; font-size: 12px; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-top: 24px; margin-bottom: 12px; padding-left: 20px;">Current Toast Positions</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-left: 20px;">
+        <thead>
+            <tr style="border-bottom: 1px solid rgba(212, 168, 75, 0.2);">
+                <th style="text-align: left; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px; letter-spacing: 1px;">TOAST</th>
+                <th style="text-align: center; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px;">X</th>
+                <th style="text-align: center; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px;">Y</th>
+                <th style="text-align: left; padding: 8px 12px; color: #d4a84b; font-weight: 400; font-size: 11px;">SCREEN</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #1a1a1a;">
+                <td style="padding: 8px 12px; color: #ccc;">"The Seat is empty"</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.07</td>
+                <td style="padding: 8px 12px; color: #888;">Solo</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #1a1a1a;">
+                <td style="padding: 8px 12px; color: #ccc;">"[Name] joined"</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.12</td>
+                <td style="padding: 8px 12px; color: #888;">Host</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #1a1a1a;">
+                <td style="padding: 8px 12px; color: #ccc;">"[Name] joined"</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.12</td>
+                <td style="padding: 8px 12px; color: #888;">Host</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #1a1a1a;">
+                <td style="padding: 8px 12px; color: #ccc;">"[Name] left"</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="padding: 8px 12px; color: #888;">Host</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #1a1a1a;">
+                <td style="padding: 8px 12px; color: #ccc;">"Connected" / "[host] is hosting"</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="padding: 8px 12px; color: #888;">Player</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 12px; color: #ccc;">"[Name] is in the seat"</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="text-align: center; padding: 8px 12px; color: #888;">0.5</td>
+                <td style="padding: 8px 12px; color: #888;">Player</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="divider"></div>
+
+    <h2>14. Pre-Submission <span class="section-count">0/4</span></h2>
+    <ul>
+        <li class="todo">Create privacy policy (hosted at bjanish.com/privacy)</li>
+        <li class="todo">App Store screenshots</li>
+        <li class="todo">App Store description and keywords</li>
+        <li class="todo">Review compliance (local network usage description)</li>
     </ul>
 
     <footer>

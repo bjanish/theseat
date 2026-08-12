@@ -20,12 +20,6 @@ struct ToastView: View {
     }
 }
 
-enum ToastPosition {
-    case top
-    case center
-    case bottom
-}
-
 struct ToastModifier: ViewModifier {
     @Binding var toast: ToastMessage?
 
@@ -34,23 +28,12 @@ struct ToastModifier: ViewModifier {
             content
 
             if let toast {
-                Group {
-                    switch toast.position {
-                    case .top:
-                        VStack {
-                            ToastView(message: toast.text, borderColor: toast.borderColor)
-                                .padding(.top, 60)
-                            Spacer()
-                        }
-                    case .center:
-                        ToastView(message: toast.text, borderColor: toast.borderColor)
-                    case .bottom:
-                        VStack {
-                            Spacer()
-                            ToastView(message: toast.text, borderColor: toast.borderColor)
-                                .padding(.bottom, 80)
-                        }
-                    }
+                GeometryReader { geo in
+                    ToastView(message: toast.text, borderColor: toast.borderColor)
+                        .position(
+                            x: geo.size.width * toast.x,
+                            y: geo.size.height * toast.y
+                        )
                 }
                 .transition(.opacity)
                 .id(toast.id)
@@ -65,7 +48,10 @@ struct ToastMessage: Equatable, Identifiable {
     let text: String
     var borderColor: Color = Color(red: 0.85, green: 0.70, blue: 0.40)
     var duration: Double = 3.0
-    var position: ToastPosition = .top
+    /// Horizontal position as fraction of screen width (0.0 = left, 0.5 = center, 1.0 = right)
+    var x: CGFloat = 0.5
+    /// Vertical position as fraction of screen height (0.0 = top, 0.5 = center, 1.0 = bottom)
+    var y: CGFloat = 0.5
 
     static func == (lhs: ToastMessage, rhs: ToastMessage) -> Bool {
         lhs.id == rhs.id

@@ -5,6 +5,7 @@ struct ContentView: View {
     @AppStorage("playerName") private var playerName: String = ""
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     @State private var showTagline = true
+    @State private var showSettings = false
 
     var body: some View {
         Group {
@@ -17,10 +18,6 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .toast(Binding(
-            get: { sessionManager.toast },
-            set: { sessionManager.toast = $0 }
-        ))
     }
 
     @ViewBuilder
@@ -128,6 +125,33 @@ struct ContentView: View {
                 Spacer()
                     .frame(height: 40)
             }
+
+            // Settings cog — top right
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(.white.opacity(0.4))
+                    }
+                    .padding(.trailing, 24)
+                    .padding(.top, 16)
+                }
+                Spacer()
+            }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
+        .toast(Binding(
+            get: { sessionManager.toast },
+            set: { sessionManager.toast = $0 }
+        ))
+        .onAppear {
+            sessionManager.startBrowser()
         }
     }
 }

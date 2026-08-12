@@ -1,6 +1,7 @@
 import Foundation
 import Network
 import SwiftUI
+import AVFoundation
 
 @MainActor @Observable
 final class SessionManager {
@@ -23,8 +24,8 @@ final class SessionManager {
     var hostRound: Int = 0
     var toast: ToastMessage?
 
-    func showToast(_ message: String, duration: Double = 3.0, position: ToastPosition = .top) {
-        let newToast = ToastMessage(text: message, duration: duration, position: position)
+    func showToast(_ message: String, duration: Double = 3.0, x: CGFloat = 0.5, y: CGFloat = 0.5) {
+        let newToast = ToastMessage(text: message, duration: duration, x: x, y: y)
         toast = newToast
         let toastId = newToast.id
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
@@ -62,14 +63,33 @@ final class SessionManager {
 
     private let serviceType = "_theseat._tcp"
 
+    // MARK: - Audio
+
+    @ObservationIgnored private var pingPlayer: AVAudioPlayer?
+
+    private func loadPingSound() {
+        Task.detached { [weak self] in
+            guard let url = Bundle.main.url(forResource: "Funk", withExtension: "aiff") else { return }
+            let player = try? AVAudioPlayer(contentsOf: url)
+            player?.prepareToPlay()
+            await MainActor.run {
+                self?.pingPlayer = player
+            }
+        }
+    }
+
+    private func playPing() {
+        pingPlayer?.currentTime = 0
+        pingPlayer?.play()
+    }
+
     // MARK: - Init
 
     init() {
         #if DEBUG
         print("[SESSION] SessionManager initialized, deviceID: \(deviceID)")
         #endif
-        // Start browsing immediately so we see hosts on the solo screen
-        startBrowser()
+        loadPingSound()
     }
 
     // MARK: - Host
@@ -112,11 +132,15 @@ final class SessionManager {
     ]
 
     private func startSimulatedCharacters() {
-        // Add characters as connected peers
-        for name in characterNames {
-            connectedPeers.append(name)
+        // Add characters as connected peers with staggered joins (like real players)
+        for (index, name) in characterNames.enumerated() {
+            let delay = Double(index) * 1.5
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self, self.role == .host else { return }
+                self.connectedPeers.append(name)
+                self.showToast("\(name) joined", y: 0.12)
+            }
         }
-        showToast("\(characterNames.count) characters joined")
 
         // Each character sends one question with a slight delay between them
         let shuffled = characterQuestions.shuffled()
@@ -125,7 +149,10 @@ final class SessionManager {
             let question = shuffled[index]
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                 guard let self, self.role == .host else { return }
-                self.questionQueue.append(question)
+                let formatted = question.hasSuffix("?") ? question : question + "?"
+                self.questionQueue.insert(formatted, at: 0)
+                self.playPing()
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 print("[CHARACTER] \(name) sent: \(question.prefix(30))...")
             }
         }
@@ -146,13 +173,13 @@ final class SessionManager {
             self?.tearDown()
             self?.role = .solo
             self?.announcedHosts = []
-            self?.showToast("Session ended", position: .center)
+            self?.showToast("The Seat is empty", y: 0.07)
             // Restart browser after delay so other phones can see future hosts
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 self?.startBrowser()
             }
             #if DEBUG
-            print("[HOST] Session ended")
+            print("[HOST] The Seat is empty")
             #endif
         }
     }
@@ -537,7 +564,7 @@ final class SessionManager {
                 role = .solo
                 hostName = ""
                 currentDisplayedQuestion = nil
-                showToast("Session ended", position: .center)
+                showToast("The Seat is empty", y: 0.07)
                 reconnectAttempts += 1
                 startBrowser()
             }
@@ -605,7 +632,7 @@ final class SessionManager {
                 role = .solo
                 hostName = ""
                 currentDisplayedQuestion = nil
-                showToast("Session ended", position: .center)
+                showToast("The Seat is empty", y: 0.07)
                 reconnectAttempts = 0
                 lastLeftHostName = nil
                 startBrowser()
@@ -638,14 +665,18 @@ final class SessionManager {
             connectionDeviceIDs[id] = incomingDeviceID
             connectionNames[id] = finalName
             connectedPeers.append(finalName)
-            showToast("\(finalName) joined")
+            showToast("\(finalName) joined", y: 0.12)
 
             #if DEBUG
             print("[HOST] Player joined: \(finalName) (device: \(incomingDeviceID))")
             #endif
 
         case .question(let text):
-            questionQueue.append(text)
+            let formatted = text.hasSuffix("?") ? text : text + "?"
+            questionQueue.insert(formatted, at: 0)
+            // Ping + light haptic for host
+            playPing()
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             #if DEBUG
             print("[RECV] Question received: \(text.prefix(30))...")
             #endif
@@ -683,10 +714,10 @@ final class SessionManager {
             role = .solo
             hostName = ""
             currentDisplayedQuestion = nil
-            showToast("Session ended")
+            showToast("The Seat is empty", y: 0.07)
             startBrowser()
             #if DEBUG
-            print("[PLAYER] Session ended by host")
+            print("[PLAYER] The Seat is empty")
             #endif
 
         case .heartbeat:

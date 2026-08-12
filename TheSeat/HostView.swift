@@ -28,6 +28,10 @@ struct HostView: View {
         .sheet(isPresented: $showPassSheet) {
             passTheSeatSheet
         }
+        .toast(Binding(
+            get: { sessionManager.toast },
+            set: { sessionManager.toast = $0 }
+        ))
     }
 
     // MARK: - Top Bar

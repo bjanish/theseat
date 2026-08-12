@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct OnboardingView: View {
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+struct HowToPlayView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var currentPage = 0
 
     private let gold = Color(red: 0.85, green: 0.70, blue: 0.40)
@@ -12,34 +12,21 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // Top bar
+                HStack {
+                    Spacer()
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(gold)
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 16)
+
                 TabView(selection: $currentPage) {
                     slide1.tag(0)
                     slide2.tag(1)
                     slide3.tag(2)
-                    slide4.tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
-
-                Button {
-                    if currentPage < 3 {
-                        withAnimation { currentPage += 1 }
-                    } else {
-                        hasSeenOnboarding = true
-                    }
-                } label: {
-                    Text(currentPage < 3 ? "Next" : "Get Started")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(gold.opacity(0.3))
-                                .stroke(gold, lineWidth: 1)
-                        )
-                }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 40)
             }
         }
     }
@@ -110,30 +97,8 @@ struct OnboardingView: View {
             Spacer()
         }
     }
-
-    private var slide4: some View {
-        VStack(spacing: 20) {
-            Spacer()
-
-            Image(systemName: "wifi")
-                .font(.system(size: 60))
-                .foregroundStyle(.green)
-
-            Text("One more thing —")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundStyle(.white)
-
-            Text("Tap \"Allow\" on the next pop-up\nso we can find players nearby.")
-                .font(.body)
-                .foregroundStyle(.white.opacity(0.7))
-                .multilineTextAlignment(.center)
-
-            Spacer()
-        }
-    }
 }
 
 #Preview {
-    OnboardingView()
+    HowToPlayView()
 }

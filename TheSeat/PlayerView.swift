@@ -42,6 +42,10 @@ struct PlayerView: View {
             hasAsked = false
             questionText = ""
         }
+        .toast(Binding(
+            get: { sessionManager.toast },
+            set: { sessionManager.toast = $0 }
+        ))
     }
 
     // MARK: - Top Bar

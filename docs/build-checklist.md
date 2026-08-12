@@ -52,7 +52,7 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Player: "Your question is in" + "Stay connected" after sending
 - [x] Player: shared question display (Cinzel) when host selects a question
 - [x] Player: Leave button
-- [ ] Settings accessible from solo screen
+- [x] Settings accessible from solo screen
 
 ---
 
@@ -97,7 +97,7 @@ Spec order = build order. Each section done-done before moving to the next.
 
 ## 7. Audio & Haptics
 
-- [ ] Question received (host): ping + light haptic
+- [x] Question received (host): ping + light haptic
 - [x] Question sent (player): light haptic
 - [ ] Pass the Seat: medium haptic both sides
 - [ ] Player connects: connection sound + medium haptic
@@ -186,3 +186,33 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Valid targets for "Pass the Seat"
 - [x] Question pool: PG-13 funny/awkward questions
 - [x] Production/Release builds: no simulated characters (behind `#if DEBUG`)
+
+---
+
+## Toast System
+
+- [x] ToastView: gold-bordered pill, dark fill, subheadline weight
+- [x] Position via x/y fractions (0.0–1.0) — place anywhere on screen
+- [x] `.toast()` modifier applied per-screen (solo, host, player) — NOT at root
+- [x] Each screen owns its own toast positioning independently
+- [x] Auto-dismiss via duration (default 3s)
+- [x] `showToast(_ message:, duration:, x:, y:)` on SessionManager
+
+### Current Toast Positions
+
+| Toast | x | y | Screen |
+|-------|---|---|--------|
+| "The Seat is empty" | 0.5 | 0.07 | Solo |
+| "[Name] joined" | 0.5 | 0.12 | Host |
+| "[Name] left" | 0.5 | 0.5 | Host |
+| "Connected" / "[host] is hosting" | 0.5 | 0.5 | Player |
+| "[Name] is in the seat" | 0.5 | 0.5 | Player |
+
+---
+
+## 14. Pre-Submission
+
+- [ ] Create privacy policy (hosted at bjanish.com/privacy)
+- [ ] App Store screenshots
+- [ ] App Store description and keywords
+- [ ] Review compliance (local network usage description)
