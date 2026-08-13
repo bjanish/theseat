@@ -16,18 +16,19 @@ struct OnboardingView: View {
                     slide1.tag(0)
                     slide2.tag(1)
                     slide3.tag(2)
-                    slide4.tag(3)
+                    slidePass.tag(3)
+                    slide4.tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
 
                 Button {
-                    if currentPage < 3 {
+                    if currentPage < 4 {
                         withAnimation { currentPage += 1 }
                     } else {
                         hasSeenOnboarding = true
                     }
                 } label: {
-                    Text(currentPage < 3 ? "Next" : "Get Started")
+                    Text(currentPage < 4 ? "Next" : "Get Started")
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -48,19 +49,21 @@ struct OnboardingView: View {
 
     private var slide1: some View {
         VStack(spacing: 20) {
-            Spacer()
+            Spacer().frame(height: 200)
 
-            Image(systemName: "chair.fill")
-                .font(.system(size: 80))
+            Image(systemName: "chair.lounge.fill")
+                .font(.system(size: 60))
+                .frame(height: 70)
                 .foregroundStyle(gold)
+                .shadow(color: gold.opacity(0.4), radius: 12, x: 0, y: 4)
 
             Text("Take the seat.")
-                .font(.title)
+                .font(.title2)
                 .fontWeight(.bold)
                 .foregroundStyle(.white)
 
             Text("Answer anything.")
-                .font(.title2)
+                .font(.body)
                 .foregroundStyle(.white.opacity(0.7))
 
             Spacer()
@@ -69,15 +72,17 @@ struct OnboardingView: View {
 
     private var slide2: some View {
         VStack(spacing: 20) {
-            Spacer()
+            Spacer().frame(height: 200)
 
             Image(systemName: "person.3.fill")
                 .font(.system(size: 60))
+                .frame(height: 70)
+                .offset(y: 1)
                 .foregroundStyle(gold)
 
             Text("Friends connect anonymously.")
                 .font(.title2)
-                .fontWeight(.semibold)
+                .fontWeight(.bold)
                 .foregroundStyle(.white)
 
             Text("Questions appear.\nNobody knows who asked what.")
@@ -91,15 +96,17 @@ struct OnboardingView: View {
 
     private var slide3: some View {
         VStack(spacing: 20) {
-            Spacer()
+            Spacer().frame(height: 200)
 
             Image(systemName: "hand.tap.fill")
                 .font(.system(size: 60))
+                .frame(height: 70)
+                .offset(y: -5)
                 .foregroundStyle(gold)
 
             Text("You pick what to answer.")
                 .font(.title2)
-                .fontWeight(.semibold)
+                .fontWeight(.bold)
                 .foregroundStyle(.white)
 
             Text("Swipe through questions.\nTap to choose one.")
@@ -111,17 +118,42 @@ struct OnboardingView: View {
         }
     }
 
+    private var slidePass: some View {
+        VStack(spacing: 20) {
+            Spacer().frame(height: 200)
+
+            Image(systemName: "person.line.dotted.person.fill")
+                .font(.system(size: 60))
+                .frame(height: 70)
+                .offset(y: -9)
+                .foregroundStyle(gold)
+
+            Text("Pass the seat.")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+
+            Text("Choose who's next.")
+                .font(.body)
+                .foregroundStyle(.white.opacity(0.7))
+                .multilineTextAlignment(.center)
+
+            Spacer()
+        }
+    }
+
     private var slide4: some View {
         VStack(spacing: 20) {
-            Spacer()
+            Spacer().frame(height: 200)
 
             Image(systemName: "wifi")
                 .font(.system(size: 60))
+                .frame(height: 70)
                 .foregroundStyle(.green)
 
             Text("One more thing —")
                 .font(.title2)
-                .fontWeight(.semibold)
+                .fontWeight(.bold)
                 .foregroundStyle(.white)
 
             Text("Tap \"Allow\" on the next pop-up\nso we can find players nearby.")

@@ -34,27 +34,27 @@
         }
 
         [data-theme="light"] {
-            --bg: #d9d0c2;
-            --bg-card: rgba(0, 0, 0, 0.03);
-            --bg-hover: rgba(0, 0, 0, 0.04);
-            --text: #2a2a2a;
-            --text-muted: #555;
-            --text-faint: #777;
-            --text-fainter: #999;
-            --text-faintest: #bbb;
+            --bg: #c8bfb0;
+            --bg-card: rgba(0, 0, 0, 0.06);
+            --bg-hover: rgba(0, 0, 0, 0.07);
+            --text: #1a1a1a;
+            --text-muted: #333;
+            --text-faint: #4a4a4a;
+            --text-fainter: #666;
+            --text-faintest: #888;
             --gold: #8b6914;
             --gold-light: #a67d1a;
             --green: #1a5c2e;
             --green-dark: #0f3d1c;
-            --border: #d4cbbe;
-            --border-light: #c8bfb0;
-            --code-bg: rgba(122, 92, 31, 0.08);
-            --code-border: rgba(122, 92, 31, 0.2);
-            --divider: rgba(122, 92, 31, 0.25);
-            --glow: rgba(122, 92, 31, 0.04);
-            --section-bar-bg: #d4cbbe;
-            --done-border: rgba(61, 140, 61, 0.3);
-            --todo-hover-border: rgba(0, 0, 0, 0.1);
+            --border: #968d7f;
+            --border-light: #8a8174;
+            --code-bg: rgba(122, 92, 31, 0.1);
+            --code-border: rgba(122, 92, 31, 0.25);
+            --divider: rgba(122, 92, 31, 0.3);
+            --glow: rgba(122, 92, 31, 0.06);
+            --section-bar-bg: #968d7f;
+            --done-border: rgba(61, 140, 61, 0.4);
+            --todo-hover-border: rgba(0, 0, 0, 0.15);
         }
 
         * {
@@ -451,6 +451,10 @@
             margin-bottom: 12px;
             padding-left: 20px;
         }
+
+        [data-theme="light"] table td[style] {
+            color: #2a2a2a !important;
+        }
     </style>
 </head>
 
@@ -834,14 +838,17 @@
         title.style.cursor = 'pointer';
         title.addEventListener('click', () => {
             clickCount++;
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             title.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2)';
             title.style.transform = `rotateY(${clickCount * 360}deg)`;
-            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#7c4dff', '#4a9eff'];
-            const randomColor = colors[clickCount % colors.length];
-            title.style.setProperty('-webkit-text-fill-color', randomColor);
-            setTimeout(() => {
-                title.style.setProperty('-webkit-text-fill-color', 'transparent');
-            }, 600);
+            if (!isLight) {
+                const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#7c4dff', '#4a9eff'];
+                const randomColor = colors[clickCount % colors.length];
+                title.style.setProperty('-webkit-text-fill-color', randomColor);
+                setTimeout(() => {
+                    title.style.setProperty('-webkit-text-fill-color', 'transparent');
+                }, 600);
+            }
         });
 
         function launchConfetti() {

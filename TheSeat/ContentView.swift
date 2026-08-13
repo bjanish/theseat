@@ -73,19 +73,29 @@ struct ContentView: View {
                     .foregroundStyle(Color(red: 0.85, green: 0.70, blue: 0.40))
                     .shadow(color: Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.3), radius: 12, x: 0, y: 0)
 
-                if showTagline {
-                    Text("Anonymously ask questions to the host")
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.5))
-                        .transition(.opacity)
-                        .onAppear {
-                            withAnimation(.easeOut(duration: 1.0).delay(4.0)) {
-                                showTagline = false
-                            }
-                        }
-                }
+                Text("Ask anything. Anonymously.")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.5))
 
                 Spacer()
+
+                Button {
+                    sessionManager.joinSession()
+                } label: {
+                    Text(sessionManager.hostName.isEmpty ? "Join" : "Join \(sessionManager.hostName)")
+                        .font(.headline)
+                        .foregroundStyle(sessionManager.hostName.isEmpty ? .white.opacity(0.3) : .white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(sessionManager.hostName.isEmpty ? Color.white.opacity(0.04) : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.2))
+                                .stroke(sessionManager.hostName.isEmpty ? Color.white.opacity(0.15) : Color(red: 0.85, green: 0.70, blue: 0.40), lineWidth: 1)
+                        )
+                        .shadow(color: sessionManager.hostName.isEmpty ? .clear : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.4), radius: 8, y: 4)
+                }
+                .disabled(sessionManager.hostName.isEmpty)
+                .padding(.horizontal, 40)
 
                 Button {
                     sessionManager.startHosting()
@@ -102,24 +112,6 @@ struct ContentView: View {
                         )
                 }
                 .disabled(!sessionManager.hostName.isEmpty)
-                .padding(.horizontal, 40)
-
-                Button {
-                    sessionManager.joinSession()
-                } label: {
-                    Text(sessionManager.hostName.isEmpty ? "Join" : "Join \(sessionManager.hostName)")
-                        .font(.headline)
-                        .foregroundStyle(sessionManager.hostName.isEmpty ? .white.opacity(0.3) : .white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(sessionManager.hostName.isEmpty ? Color.white.opacity(0.04) : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.2))
-                                .stroke(sessionManager.hostName.isEmpty ? Color.white.opacity(0.15) : Color(red: 0.85, green: 0.70, blue: 0.40), lineWidth: 1)
-                        )
-                        .shadow(color: sessionManager.hostName.isEmpty ? .clear : Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.4), radius: 8)
-                }
-                .disabled(sessionManager.hostName.isEmpty)
                 .padding(.horizontal, 40)
 
                 Spacer()

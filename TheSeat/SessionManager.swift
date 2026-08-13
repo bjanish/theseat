@@ -60,6 +60,7 @@ final class SessionManager {
     @ObservationIgnored private var lastLeftHostName: String?
 
     private let networkQueue = DispatchQueue(label: "com.bjanish.theseat.network")
+    private let audioQueue = DispatchQueue(label: "com.bjanish.theseat.audio")
 
     private let serviceType = "_theseat._tcp"
 
@@ -79,8 +80,23 @@ final class SessionManager {
     }
 
     private func playPing() {
-        pingPlayer?.currentTime = 0
-        pingPlayer?.play()
+        guard let player = pingPlayer else { return }
+        audioQueue.async {
+            player.currentTime = 0
+            player.play()
+        }
+    }
+
+    private func primeAudio() {
+        guard let player = pingPlayer else { return }
+        audioQueue.async {
+            let originalVolume = player.volume
+            player.volume = 0
+            player.currentTime = 0
+            player.play()
+            player.stop()
+            player.volume = originalVolume
+        }
     }
 
     // MARK: - Init
@@ -98,6 +114,7 @@ final class SessionManager {
         role = .host
         stopBrowser()
         startListener()
+        primeAudio()
         #if DEBUG
         print("[HOST] Started hosting session")
         startSimulatedCharacters()
@@ -109,26 +126,36 @@ final class SessionManager {
     #if DEBUG
     @ObservationIgnored private var characterNames = ["Charlie", "Lucy", "Schroeder"]
     private let characterQuestions = [
-        "What's your most embarrassing moment?",
-        "If you could be anyone for a day, who?",
-        "What's the worst advice you've ever given?",
-        "What do you think about when you can't sleep?",
-        "If you had to delete one app, which one?",
-        "What's something you pretend to like but don't?",
-        "Who in this room would survive a zombie apocalypse?",
-        "What's the dumbest thing you've ever spent money on?",
-        "If your life was a movie, what would the title be?",
-        "What's a hill you'll die on?",
-        "If you could uninvent one thing, what would it be?",
-        "What's your guilty pleasure?",
-        "Who was your first celebrity crush?",
-        "If you could only eat one food forever, what is it?",
-        "What's something you're terrible at but love doing?",
-        "What's the best compliment you've ever received?",
-        "If you won the lottery tomorrow, what's the first thing you'd do?",
-        "What's a movie you can watch over and over?",
-        "What's the longest you've gone without sleep?",
-        "If you could have dinner with anyone, living or dead, who?"
+        "What's the wildest thing you've done that nobody here knows about?",
+        "Have you ever hooked up with someone in this room?",
+        "What's the most inappropriate thought you've had at work?",
+        "Who here would you most want to see naked?",
+        "What's your body count?",
+        "What's the worst lie you've told to get someone into bed?",
+        "Have you ever faked it? Be honest.",
+        "What's the kinkiest thing on your bucket list?",
+        "Who's the last person you stalked on Instagram at 2am?",
+        "What's the drunkest you've ever been and what happened?",
+        "Have you ever sent a nude to the wrong person?",
+        "What's something you'd never admit to your partner?",
+        "What's the most embarrassing thing in your search history?",
+        "Who in this room do you think is secretly a freak?",
+        "What's the worst reason you've ghosted someone?",
+        "What's your biggest red flag that you're aware of?",
+        "Who's your most regrettable hookup?",
+        "What's the most desperate thing you've done for attention?",
+        "Have you ever lied about finishing?",
+        "What's the horniest decision you've ever made?",
+        "Who in this room would you trust with a secret the least?",
+        "What's the worst thing you've done while drunk that you remember?",
+        "Have you ever been the other person in someone's relationship?",
+        "What's the most unhinged text you've sent at 3am?",
+        "Who here do you think has the most secrets?",
+        "What's something you've done that would ruin your reputation?",
+        "Have you ever caught feelings for someone you shouldn't have?",
+        "What's the biggest lie you're currently living?",
+        "What would your ex say is the worst thing about you?",
+        "Have you ever pretended to be drunker than you were? Why?"
     ]
 
     private func startSimulatedCharacters() {
@@ -142,12 +169,13 @@ final class SessionManager {
             }
         }
 
-        // Each character sends one question with a slight delay between them
+        // Each character sends one question 10s after they join
         let shuffled = characterQuestions.shuffled()
         for (index, name) in characterNames.enumerated() {
-            let delay = Double(index + 1) * 2.0
+            let joinDelay = Double(index) * 1.5
+            let questionDelay = joinDelay + Double.random(in: 5.0...12.0)
             let question = shuffled[index]
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + questionDelay) { [weak self] in
                 guard let self, self.role == .host else { return }
                 let formatted = question.hasSuffix("?") ? question : question + "?"
                 self.questionQueue.insert(formatted, at: 0)
