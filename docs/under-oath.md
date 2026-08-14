@@ -1,6 +1,8 @@
-# Lie Detector
+# Under Oath
 
 **Status:** Concept locked. Build after The Seat ships.
+
+**Tentative Name:** Under Oath
 
 ## Core Concept
 
@@ -37,7 +39,7 @@ Host asks a question, everyone submits an answer (truth or lie). Host reads them
 2. Does every player HAVE to lie, or is it optional?
 3. Scoring — points for fooling people? Points for catching liars?
 4. Round structure — fixed rounds or host controls pacing?
-5. Name — "Lie Detector" or "Polygraph" or something else?
+5. Name — "Lie Detector" or "Polygraph" or something else? **Tentative: "Under Oath"**
 6. Visual theme — TBD (dark, moody, interrogation room? polygraph aesthetic?)
 
 ## Reusable From The Seat

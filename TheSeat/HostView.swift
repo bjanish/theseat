@@ -246,10 +246,25 @@ struct HostView: View {
                     sessionManager.passTheSeat(to: name)
                     showPassSheet = false
                 } label: {
-                    Text(name)
-                        .foregroundStyle(.white)
+                    HStack {
+                        Text(name)
+                            .foregroundStyle(gold)
+                            .font(.body.weight(.medium))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(gold.opacity(0.4))
+                    }
                 }
-                .listRowBackground(Color(white: 0.16))
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(white: 0.16))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(gold.opacity(0.1), lineWidth: 1)
+                        )
+                        .padding(.vertical, 2)
+                )
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -257,8 +272,19 @@ struct HostView: View {
             .navigationTitle("Pass the Seat")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "chair.lounge.fill")
+                            .font(.caption)
+                            .foregroundStyle(gold)
+                        Text("Pass the Seat")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                    }
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { showPassSheet = false }
+                        .foregroundStyle(gold)
                 }
             }
         }
