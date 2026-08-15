@@ -17,6 +17,10 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 // Top bar
                 HStack {
+                    Text("Done")
+                        .font(.body)
+                        .hidden()
+                        .padding(.leading, 8)
                     Spacer()
                     Text("Settings")
                         .font(.headline)
@@ -24,6 +28,7 @@ struct SettingsView: View {
                     Spacer()
                     Button("Done") { dismiss() }
                         .foregroundStyle(gold)
+                        .padding(.trailing, 8)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 16)

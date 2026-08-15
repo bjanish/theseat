@@ -557,7 +557,9 @@ final class SessionManager {
 
             switch serviceState {
             case "ready":
-                readyPeerNames.append(peerName)
+                if !peerName.isEmpty {
+                    readyPeerNames.append(peerName)
+                }
 
             case "host":
                 visibleHostServiceNames.insert(name)
