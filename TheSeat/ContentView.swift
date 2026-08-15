@@ -121,6 +121,7 @@ struct ContentView: View {
                 }
                 .disabled(!sessionManager.hostName.isEmpty)
                 .padding(.horizontal, 40)
+                .padding(.top, -20)
 
                 Spacer()
                     .frame(height: 40)
