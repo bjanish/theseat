@@ -110,7 +110,7 @@ struct ContentView: View {
                 Button {
                     sessionManager.startHosting()
                 } label: {
-                    Text(sessionManager.hostName.isEmpty ? "Take the Seat" : "\(sessionManager.hostName) is in the seat")
+                    Text(sessionManager.hostName.isEmpty ? "Take the Seat" : "\(sessionManager.hostName) is in The Seat")
                         .font(.headline)
                         .foregroundStyle(sessionManager.hostName.isEmpty ? .white : .white.opacity(0.3))
                         .frame(maxWidth: .infinity)

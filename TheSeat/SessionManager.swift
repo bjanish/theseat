@@ -469,7 +469,7 @@ final class SessionManager {
         let id = ObjectIdentifier(connection)
         if let name = connectionNames[id] {
             connectedPeers.removeAll { $0 == name }
-            showToast("\(name) left")
+            showToast("\(name) left", y: 0.12)
             #if DEBUG
             print("[DISCONNECT] Player disconnected: \(name)")
             #endif
@@ -611,7 +611,7 @@ final class SessionManager {
             role = .player
             stopBrowser()
             stopReadyListener()
-            showToast(hostName.isEmpty ? "Connected" : "\(hostName) is hosting")
+            showToast(hostName.isEmpty ? "Connected" : "\(hostName) is in The Seat")
             #if DEBUG
             print("[CONNECT] Connected to host")
             #endif
@@ -768,7 +768,7 @@ final class SessionManager {
             hostName = name
             hostRound += 1
             currentDisplayedQuestion = nil
-            showToast("\(name) is in the seat")
+            showToast("\(name) is in The Seat")
             #if DEBUG
             print("[PLAYER] New host: \(name)")
             #endif
