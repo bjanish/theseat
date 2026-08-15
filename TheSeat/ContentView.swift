@@ -73,7 +73,8 @@ struct ContentView: View {
                     .tracking(10)
                     .foregroundStyle(Color(red: 0.85, green: 0.70, blue: 0.40))
                     .shadow(color: Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.3), radius: 12, x: 0, y: 0)
-                    .offset(y: 24)
+                    .padding(.top, -10)
+                    .offset(y: 22)
 
                 Text("Ask anything. Anonymously.")
                     .font(.subheadline)

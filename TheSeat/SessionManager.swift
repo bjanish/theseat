@@ -204,7 +204,7 @@ final class SessionManager {
             self?.tearDown()
             self?.role = .solo
             self?.announcedHosts = []
-            self?.showToast("The Seat is empty", y: 0.07)
+            self?.showToast("The Seat is empty", y: 0.04)
             // Restart browser after delay so other phones can see future hosts
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 self?.startBrowser()
@@ -627,7 +627,7 @@ final class SessionManager {
                 role = .solo
                 hostName = ""
                 currentDisplayedQuestion = nil
-                showToast("The Seat is empty", y: 0.07)
+                showToast("The Seat is empty", y: 0.04)
                 reconnectAttempts += 1
                 startBrowser()
             }
@@ -695,7 +695,7 @@ final class SessionManager {
                 role = .solo
                 hostName = ""
                 currentDisplayedQuestion = nil
-                showToast("The Seat is empty", y: 0.07)
+                showToast("The Seat is empty", y: 0.04)
                 reconnectAttempts = 0
                 lastLeftHostName = nil
                 startBrowser()
@@ -777,7 +777,7 @@ final class SessionManager {
             role = .solo
             hostName = ""
             currentDisplayedQuestion = nil
-            showToast("The Seat is empty", y: 0.07)
+            showToast("The Seat is empty", y: 0.04)
             startBrowser()
             #if DEBUG
             print("[PLAYER] The Seat is empty")
