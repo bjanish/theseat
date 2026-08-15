@@ -470,14 +470,14 @@
         <div class="subtitle">Build Checklist</div>
         <div class="progress-container">
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 75%"></div>
+                <div class="progress-fill" style="width: 77%"></div>
             </div>
-            <span class="progress-text">75%</span>
+            <span class="progress-text">77%</span>
         </div>
         <div class="stats">
-            <div class="stat"><span class="stat-number">94</span><span class="stat-label">Done</span></div>
+            <div class="stat"><span class="stat-number">102</span><span class="stat-label">Done</span></div>
             <div class="stat"><span class="stat-number">31</span><span class="stat-label">Remaining</span></div>
-            <div class="stat"><span class="stat-number">16</span><span class="stat-label">Sections</span></div>
+            <div class="stat"><span class="stat-number">17</span><span class="stat-label">Sections</span></div>
         </div>
     </div>
 
@@ -515,6 +515,22 @@
             <li class="todo">Test host-to-player on two real phones (second session reconnect)</li>
             <li class="todo">Verify auto-reconnect after player resume from background</li>
             <li class="todo">Test without WiFi (AWDL peer-to-peer only)</li>
+        </ul>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 onclick="toggleSection(this)">Room Presence (Pre-Host) <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">8/8</span></span></h2>
+    <div class="section-content">
+        <ul>
+            <li class="done">Solo phones advertise <code>-ready</code> Bonjour service after onboarding</li>
+            <li class="done">Solo phones browse for both <code>-ready</code> peers and <code>-host</code> sessions</li>
+            <li class="done">"THE ROOM IS GATHERING" capsule shows nearby ready peers with dot indicators</li>
+            <li class="done">Peer names listed with "You" appended, single-line truncation</li>
+            <li class="done">Capsule disappears when a host is detected (replaced by Join button state)</li>
+            <li class="done">Ready listener stops when hosting, joining, backgrounding, or tearing down</li>
+            <li class="done">Capsule reserves layout space when hidden (no layout shift)</li>
+            <li class="done">Empty peer names filtered out</li>
         </ul>
     </div>
 

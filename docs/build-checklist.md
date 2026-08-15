@@ -37,6 +37,19 @@ Spec order = build order. Each section done-done before moving to the next.
 
 ---
 
+## Room Presence (Pre-Host)
+
+- [x] Solo phones advertise `-ready` Bonjour service after onboarding
+- [x] Solo phones browse for both `-ready` peers and `-host` sessions
+- [x] "THE ROOM IS GATHERING" capsule shows nearby ready peers with dot indicators
+- [x] Peer names listed with "You" appended, single-line truncation
+- [x] Capsule disappears when a host is detected (replaced by Join button state)
+- [x] Ready listener stops when hosting, joining, backgrounding, or tearing down
+- [x] Capsule reserves layout space when hidden (no layout shift)
+- [x] Empty peer names filtered out
+
+---
+
 ## 3. Screens & UI Skeleton
 
 - [x] Name entry: text field, persists UserDefaults, first launch only
