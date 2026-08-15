@@ -83,7 +83,7 @@ struct ContentView: View {
                     .offset(y: 24)
 
                 roomPresence
-                    .offset(y: 24)
+                    .offset(y: 32)
 
                 Spacer()
 
