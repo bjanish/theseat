@@ -66,24 +66,24 @@ struct ContentView: View {
                 Spacer()
 
                 GlowView()
-                    .offset(y: 32)
+                    .offset(y: 24)
 
                 Text("THE SEAT")
                     .font(.custom("Cinzel-Regular", size: 42))
                     .tracking(10)
                     .foregroundStyle(Color(red: 0.85, green: 0.70, blue: 0.40))
                     .shadow(color: Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.3), radius: 12, x: 0, y: 0)
-                    .offset(y: 32)
+                    .offset(y: 24)
 
                 Text("Ask anything. Anonymously.")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.5))
                     .padding(.top, -2)
                     .padding(.bottom, 2)
-                    .offset(y: 32)
+                    .offset(y: 24)
 
                 roomPresence
-                    .offset(y: 32)
+                    .offset(y: 24)
 
                 Spacer()
 
