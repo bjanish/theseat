@@ -66,22 +66,24 @@ struct ContentView: View {
                 Spacer()
 
                 GlowView()
-                    .offset(y: 15)
+                    .offset(y: 30)
 
                 Text("THE SEAT")
                     .font(.custom("Cinzel-Regular", size: 42))
                     .tracking(10)
                     .foregroundStyle(Color(red: 0.85, green: 0.70, blue: 0.40))
                     .shadow(color: Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.3), radius: 12, x: 0, y: 0)
-                    .offset(y: 15)
+                    .offset(y: 30)
 
                 Text("Ask anything. Anonymously.")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.5))
                     .padding(.top, -2)
                     .padding(.bottom, 2)
+                    .offset(y: 30)
 
                 roomPresence
+                    .offset(y: 30)
 
                 Spacer()
 
@@ -156,42 +158,41 @@ struct ContentView: View {
     @ViewBuilder
     private var roomPresence: some View {
         let nearbyNames = sessionManager.nearbyReadyPeerNames
+        let visible = sessionManager.hostName.isEmpty && !nearbyNames.isEmpty
 
-        if sessionManager.hostName.isEmpty && !nearbyNames.isEmpty {
-            VStack(spacing: 7) {
-                Text("THE ROOM IS GATHERING")
-                    .font(.custom("Cinzel-Regular", size: 10))
-                    .tracking(1.5)
-                    .foregroundStyle(Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.8))
+        VStack(spacing: 7) {
+            Text("THE ROOM IS GATHERING")
+                .font(.custom("Cinzel-Regular", size: 10))
+                .tracking(1.5)
+                .foregroundStyle(Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.8))
 
-                HStack(spacing: 5) {
-                    ForEach(0..<(nearbyNames.count + 1), id: \.self) { _ in
-                        Circle()
-                            .fill(Color(red: 0.85, green: 0.70, blue: 0.40))
-                            .frame(width: 6, height: 6)
-                    }
-
-                    Text("\(nearbyNames.count + 1) phones nearby")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.6))
-                        .padding(.leading, 4)
+            HStack(spacing: 5) {
+                ForEach(0..<max(nearbyNames.count + 1, 1), id: \.self) { _ in
+                    Circle()
+                        .fill(Color(red: 0.85, green: 0.70, blue: 0.40))
+                        .frame(width: 6, height: 6)
                 }
 
-                Text((nearbyNames + ["You"]).joined(separator: " · "))
-                    .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.35))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                Text("\(nearbyNames.count + 1) phones nearby")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+                    .padding(.leading, 4)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.black.opacity(0.22))
-                    .stroke(Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.18), lineWidth: 1)
-            )
-            .transition(.opacity.combined(with: .scale(scale: 0.96)))
+
+            Text((nearbyNames + ["You"]).joined(separator: " · "))
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.35))
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.black.opacity(0.22))
+                .stroke(Color(red: 0.85, green: 0.70, blue: 0.40).opacity(0.18), lineWidth: 1)
+        )
+        .opacity(visible ? 1 : 0)
     }
 }
 
