@@ -1,54 +1,87 @@
 # Under Oath
 
-**Status:** Concept locked. Build after The Seat ships.
+**Status:** On the shelf. Preserve this concept and visual direction; revisit only after The Seat ships and a stronger core game loop is defined.
 
-**Tentative Name:** Under Oath
+## Product Premise
 
-## Core Concept
+Under Oath is a nearby, multi-device social verdict experience.
 
-Host asks a question, everyone submits an answer (truth or lie). Host reads them aloud, group votes on who's lying. Same peer-to-peer networking as HCF/The Seat — no internet, no accounts, no setup.
+One person is **Under Oath**. The other participants submit one anonymous binary verdict:
 
-## Why This Works
+- **Guilty**
+- **Not Guilty**
 
-- Same proven anonymous submission mechanic
-- Social deduction is inherently fun (Mafia, Werewolf, Among Us)
-- Creates shouting matches and accusations — the group IS the game
-- Reuses the entire networking layer from The Seat
-- Low lift to build — different UI skin, same bones
+The person under oath receives the collective outcome, but must never see how any individual participant voted.
 
-## Tech
+The dramatic engine is anonymous judgment, suspense before the reveal, and the social tension of receiving a verdict from the room.
 
-- Port networking layer from The Seat (NWBrowser + NWListener + NWConnection, includePeerToPeer)
-- Service type: TBD
-- Host/player roles, same architecture
-- StoreKit 2 paywall (same pattern as The Seat)
-- SwiftUI, no backend, pure Apple frameworks
+## Essential Rules
 
-## Flow
+- There are **no questions**, typed answers, truth-or-lie submissions, or liar-identification mechanics.
+- Each participant's action is a binary **Guilty** or **Not Guilty** verdict.
+- Individual verdict attribution is never shown to the person under oath.
+- The reveal communicates the group result without mapping a verdict back to a person.
+- The app is about judgment, not interrogation or anonymous Q&A.
 
-1. Host picks a question (or types one)
-2. All players submit an answer — could be truth or a lie
-3. Host reads answers aloud one by one
-4. Group discusses / accuses
-5. Everyone votes on who they think is lying
-6. Reveal: who was actually lying
+## Core Round Shape
 
-## Open Questions
+1. A person is placed Under Oath.
+2. Nearby participants submit **Guilty** or **Not Guilty** anonymously.
+3. Voting closes.
+4. The collective verdict is revealed to the person under oath and the room.
+5. A future round begins with the next person.
 
-1. Does the host also submit an answer?
-2. Does every player HAVE to lie, or is it optional?
-3. Scoring — points for fooling people? Points for catching liars?
-4. Round structure — fixed rounds or host controls pacing?
-5. Name — "Lie Detector" or "Polygraph" or something else? **Tentative: "Under Oath"**
-6. Visual theme — TBD (dark, moody, interrogation room? polygraph aesthetic?)
+The exact start, close, and reveal controls remain product decisions to make during design.
 
-## Reusable From The Seat
+## Why It Is Distinct From The Seat
 
-- SessionManager architecture (@MainActor @Observable)
-- Network framework peer-to-peer (NWBrowser/NWListener/NWConnection)
-- Toast system (per-screen, x/y positioning)
-- Onboarding flow (slides + network permission prime)
-- Settings view pattern
-- Audio/haptic system (preloaded AVAudioPlayer)
-- Build checklist HTML dashboard template
-- Paywall (StoreKit 2 / StoreManager pattern)
+| The Seat | Under Oath |
+|---|---|
+| Anonymous questions | Anonymous binary verdicts |
+| A host selects a question and answers it | A person receives the room's collective judgment |
+| Anonymity protects the asker | Anonymity protects the voter |
+| The social moment is honesty and disclosure | The social moment is suspense and judgment |
+
+The apps may reuse nearby-device networking patterns, but they are separate products with different player actions, outcomes, and emotional stakes.
+
+## Visual Direction — Locked
+
+### Home Screen
+
+- Full-screen witness-box image: a faceless person in a black suit, seated at dark wood courtroom furniture, with their right hand raised in oath.
+- No face visible.
+- Palette: near-black, deep brown wood, warm amber hand highlights, restrained gold.
+- The raised hand is the visual focal point and must remain unobstructed.
+- Text and controls sit on their own dark translucent backplates so they stay readable without washing out the artwork.
+
+### App Icon
+
+- Tight crop of the raised hand, suit, and dark wood setting.
+- Thin gold inset border.
+- No text in the icon.
+- The hand must read immediately at small Home Screen size.
+
+The image prompt reference is in `docs/splash-image.md`.
+
+## Future Technical Direction
+
+Under Oath can reuse proven architecture patterns from The Seat after The Seat ships:
+
+- SwiftUI app structure
+- `@MainActor @Observable` session state
+- Network framework peer-to-peer discovery and connections (`NWBrowser`, `NWListener`, `NWConnection`)
+- Local-network onboarding and permission priming
+- Toast, audio, haptic, settings, and build-checklist patterns
+
+Reuse the engineering patterns deliberately, but keep Under Oath's message model, screens, state, and user flow separate from The Seat.
+
+## Product Decisions Still Open
+
+1. Who starts a round and chooses the person Under Oath?
+2. Does every connected participant have to vote before the verdict can reveal?
+3. Does the reveal show only **Guilty** / **Not Guilty**, or also a vote count or percentage?
+4. How does a round close: host control, timed vote, or unanimous participation?
+5. How does the next person take their turn?
+6. What are the minimum and maximum player counts?
+7. Is there any response or discussion state after the verdict, or does the app move directly to the next round?
+8. What unique Bonjour service type and bundle ID will Under Oath use?

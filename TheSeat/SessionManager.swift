@@ -17,6 +17,7 @@ final class SessionManager {
     var role: Role = .solo
     var playerName: String = UserDefaults.standard.string(forKey: "playerName") ?? ""
     var connectedPeers: [String] = []
+    var nearbyReadyPeerNames: [String] = []
     var questionQueue: [String] = []
     var currentDisplayedQuestion: String?
     var hostName: String = ""
@@ -49,6 +50,7 @@ final class SessionManager {
     // MARK: - Networking
 
     @ObservationIgnored private var listener: NWListener?
+    @ObservationIgnored private var readyListener: NWListener?
     @ObservationIgnored private var browser: NWBrowser?
     @ObservationIgnored private var hostConnection: NWConnection?
     @ObservationIgnored private var playerConnections: [NWConnection] = []
@@ -113,6 +115,7 @@ final class SessionManager {
     func startHosting() {
         role = .host
         stopBrowser()
+        stopReadyListener()
         startListener()
         primeAudio()
         #if DEBUG
@@ -328,9 +331,11 @@ final class SessionManager {
             role = .solo
             hostName = ""
             stopBrowser()
+            stopReadyListener()
             lastLeftHostName = nil
         case .solo:
             stopBrowser()
+            stopReadyListener()
         }
     }
 
@@ -371,6 +376,37 @@ final class SessionManager {
             print("[HOST] Failed to start listener: \(error)")
             #endif
         }
+    }
+
+    private func startReadyListener() {
+        guard readyListener == nil, role == .solo else { return }
+        do {
+            let params = NWParameters.tcp
+            params.includePeerToPeer = true
+            let rl = try NWListener(using: params)
+            let serviceName = "\(playerName)-\(deviceID)-ready"
+            rl.service = NWListener.Service(name: serviceName, type: serviceType)
+            rl.newConnectionHandler = { connection in
+                connection.cancel()
+            }
+            rl.stateUpdateHandler = { state in
+                #if DEBUG
+                print("[READY] Listener state: \(state)")
+                #endif
+            }
+            rl.start(queue: networkQueue)
+            readyListener = rl
+        } catch {
+            #if DEBUG
+            print("[READY] Failed to advertise presence: \(error)")
+            #endif
+        }
+    }
+
+    private func stopReadyListener() {
+        readyListener?.cancel()
+        readyListener = nil
+        nearbyReadyPeerNames = []
     }
 
     private func handleNewPlayerConnection(_ connection: NWConnection) {
@@ -458,6 +494,10 @@ final class SessionManager {
     // MARK: - Private: Browser
 
     func startBrowser() {
+        guard role == .solo else { return }
+
+        startReadyListener()
+
         // Don't start if already browsing
         guard browser == nil else { return }
 
@@ -493,11 +533,15 @@ final class SessionManager {
     private func stopBrowser() {
         browser?.cancel()
         browser = nil
+        nearbyReadyPeerNames = []
     }
 
     private func handleBrowseResults(_ results: Set<NWBrowser.Result>) {
         lastBrowseResults = results
         let selfPrefix = "\(playerName)-\(deviceID)"
+        var readyPeerNames: [String] = []
+        var discoveredHost: (name: String, endpoint: NWEndpoint)?
+        var visibleHostServiceNames: Set<String> = []
 
         for result in results {
             guard case let .service(name, _, _, _) = result.endpoint else { continue }
@@ -505,62 +549,52 @@ final class SessionManager {
             // Self-filter
             if name.hasPrefix(selfPrefix) { continue }
 
-            // Only connect to hosts
-            guard name.hasSuffix("-host") else { continue }
-
-            // Skip intentionally left host
-            if let leftHost = lastLeftHostName, name.contains(leftHost) { continue }
-
-            // Circuit breaker
-            guard reconnectAttempts < 3 else { continue }
-
-            // Extract host name
             let parts = name.components(separatedBy: "-")
-            let discoveredHostName = parts.count >= 3 ? parts.dropLast(2).joined(separator: "-") : name
+            guard parts.count >= 3 else { continue }
 
-            if role == .solo {
-                if wantsToJoin && !isConnectingToHost {
-                    // Player tapped "Join" — connect
-                    hostName = discoveredHostName
-                    wantsToJoin = false
-                    connectToHost(endpoint: result.endpoint)
-                    break
-                } else if !wantsToJoin && !isConnectingToHost {
-                    // Always update hostName so the button reflects current state
-                    hostName = discoveredHostName
-                    break
-                }
+            let peerName = parts.dropLast(2).joined(separator: "-")
+            let serviceState = parts.last
+
+            switch serviceState {
+            case "ready":
+                readyPeerNames.append(peerName)
+
+            case "host":
+                visibleHostServiceNames.insert(name)
+
+                // Skip intentionally left host
+                if let leftHost = lastLeftHostName, name.contains(leftHost) { continue }
+
+                // Circuit breaker
+                guard reconnectAttempts < 3, discoveredHost == nil else { continue }
+                discoveredHost = (peerName, result.endpoint)
+
+            default:
+                continue
             }
         }
+
+        nearbyReadyPeerNames = Array(Set(readyPeerNames)).sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 
         // If the host we left is no longer visible, clear lastLeftHostName
-        if let leftHost = lastLeftHostName {
-            let stillVisible = results.contains { result in
-                if case let .service(name, _, _, _) = result.endpoint {
-                    return name.contains(leftHost)
-                }
-                return false
-            }
-            if !stillVisible {
-                lastLeftHostName = nil
-            }
+        if let leftHost = lastLeftHostName,
+           !visibleHostServiceNames.contains(where: { $0.contains(leftHost) }) {
+            lastLeftHostName = nil
         }
 
-        // Clear announced hosts that are no longer visible
-        let currentServiceNames = Set(results.compactMap { result -> String? in
-            if case let .service(name, _, _, _) = result.endpoint { return name }
-            return nil
-        })
-        announcedHosts = announcedHosts.intersection(currentServiceNames)
+        announcedHosts = announcedHosts.intersection(visibleHostServiceNames)
 
-        // If no hosts visible anymore, clear hostName
-        let hasVisibleHost = results.contains { result in
-            if case let .service(name, _, _, _) = result.endpoint {
-                return name.hasSuffix("-host") && !name.hasPrefix("\(playerName)-\(deviceID)")
+        guard role == .solo else { return }
+
+        if let discoveredHost {
+            if wantsToJoin && !isConnectingToHost {
+                hostName = discoveredHost.name
+                wantsToJoin = false
+                connectToHost(endpoint: discoveredHost.endpoint)
+            } else if !wantsToJoin && !isConnectingToHost {
+                hostName = discoveredHost.name
             }
-            return false
-        }
-        if !hasVisibleHost && role == .solo {
+        } else {
             hostName = ""
         }
     }
@@ -574,6 +608,7 @@ final class SessionManager {
             reconnectAttempts = 0
             role = .player
             stopBrowser()
+            stopReadyListener()
             showToast(hostName.isEmpty ? "Connected" : "\(hostName) is hosting")
             #if DEBUG
             print("[CONNECT] Connected to host")
@@ -758,6 +793,7 @@ final class SessionManager {
     private func tearDown() {
         listener?.cancel()
         listener = nil
+        stopReadyListener()
         browser?.cancel()
         browser = nil
         hostConnection?.cancel()

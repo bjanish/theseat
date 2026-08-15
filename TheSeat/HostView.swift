@@ -255,6 +255,7 @@ struct HostView: View {
                             .font(.caption)
                             .foregroundStyle(gold.opacity(0.4))
                     }
+                    .padding(.horizontal, 20)
                 }
                 .listRowBackground(
                     RoundedRectangle(cornerRadius: 8)
@@ -265,6 +266,7 @@ struct HostView: View {
                         )
                         .padding(.vertical, 2)
                 )
+                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -273,14 +275,15 @@ struct HostView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 12) {
                         Image(systemName: "chair.lounge.fill")
-                            .font(.caption)
+                            .font(.body)
                             .foregroundStyle(gold)
                         Text("Pass the Seat")
                             .font(.headline)
                             .foregroundStyle(.white)
                     }
+                    .padding(.leading, 8)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { showPassSheet = false }
