@@ -4,6 +4,7 @@ import AVFoundation
 @main
 struct TheSeatApp: App {
     @State private var sessionManager = SessionManager()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -11,6 +12,16 @@ struct TheSeatApp: App {
                 .environment(sessionManager)
                 .onAppear {
                     configureAudioSession()
+                }
+                .onChange(of: scenePhase) { _, newPhase in
+                    switch newPhase {
+                    case .background:
+                        sessionManager.enterBackground()
+                    case .active:
+                        sessionManager.resumeFromBackground()
+                    default:
+                        break
+                    }
                 }
         }
     }
