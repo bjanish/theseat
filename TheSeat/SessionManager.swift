@@ -584,6 +584,11 @@ final class SessionManager {
 
         nearbyReadyPeerNames = readyPeerNames.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 
+        #if DEBUG
+        let hostServices = visibleHostServiceNames.isEmpty ? "none" : visibleHostServiceNames.joined(separator: ", ")
+        print("[BROWSE] Ready peers: \(nearbyReadyPeerNames), Hosts: \(hostServices)")
+        #endif
+
         // If the host we left is no longer visible, clear lastLeftHostName
         if let leftHost = lastLeftHostName,
            !visibleHostServiceNames.contains(where: { $0.contains(leftHost) }) {
@@ -597,12 +602,25 @@ final class SessionManager {
         if let discoveredHost {
             if wantsToJoin && !isConnectingToHost {
                 hostName = discoveredHost.name
+                #if DEBUG
+                print("[BROWSE] hostName set (joining): \(discoveredHost.name)")
+                #endif
                 wantsToJoin = false
                 connectToHost(endpoint: discoveredHost.endpoint)
             } else if !wantsToJoin && !isConnectingToHost {
+                if hostName != discoveredHost.name {
+                    #if DEBUG
+                    print("[BROWSE] hostName changed: \(hostName) → \(discoveredHost.name)")
+                    #endif
+                }
                 hostName = discoveredHost.name
             }
         } else {
+            if !hostName.isEmpty {
+                #if DEBUG
+                print("[BROWSE] hostName cleared (no hosts visible)")
+                #endif
+            }
             hostName = ""
         }
     }
@@ -745,6 +763,9 @@ final class SessionManager {
 
         case .welcome(let name):
             hostName = name
+            #if DEBUG
+            print("[PLAYER] Host name updated via welcome: \(name)")
+            #endif
 
         case .question(let text):
             let formatted = text.hasSuffix("?") ? text : text + "?"
