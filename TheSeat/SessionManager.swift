@@ -191,22 +191,15 @@ final class SessionManager {
         }
     }
 
-    private func stopSimulatedCharacters() {
-        // Nothing to stop — no timer, just one-shot delays
-    }
     #endif
 
     func endSession() {
-        #if DEBUG
-        stopSimulatedCharacters()
-        #endif
         let hadPlayers = !connectedPeers.isEmpty
         sendToAllPlayers(.sessionEnd)
         // Tear down after a brief moment to let the message send
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             self?.tearDown()
             self?.role = .solo
-            self?.announcedHosts = []
             if hadPlayers {
                 self?.showToast("The Seat is empty", y: 0.04)
             }
@@ -256,7 +249,6 @@ final class SessionManager {
 
     @ObservationIgnored private var wantsToJoin: Bool = false
     @ObservationIgnored private var lastBrowseResults: Set<NWBrowser.Result> = []
-    @ObservationIgnored private var announcedHosts: Set<String> = []
 
     func joinSession() {
         wantsToJoin = true
@@ -595,8 +587,6 @@ final class SessionManager {
             lastLeftHostName = nil
         }
 
-        announcedHosts = announcedHosts.intersection(visibleHostServiceNames)
-
         guard role == .solo else { return }
 
         if let discoveredHost {
@@ -848,6 +838,5 @@ final class SessionManager {
         wantsToJoin = false
         peersWereNearbyAtHostStart = false
         lastBrowseResults = []
-        announcedHosts = []
     }
 }

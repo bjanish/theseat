@@ -4,7 +4,6 @@ struct ContentView: View {
     @Environment(SessionManager.self) private var sessionManager
     @AppStorage("playerName") private var playerName: String = ""
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
-    @State private var showTagline = true
     @State private var showSettings = false
 
     var body: some View {
