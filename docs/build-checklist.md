@@ -145,7 +145,7 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] "End Session" = same as backgrounding
 - [x] Player returns to solo on host disconnect
 - [ ] Idle timer disabled while active
-- [ ] Test background/resume on real devices
+- [x] Test background/resume on real devices
 
 ---
 
