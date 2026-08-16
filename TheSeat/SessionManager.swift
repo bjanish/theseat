@@ -23,6 +23,7 @@ final class SessionManager {
     var hostName: String = ""
     var isConnectingToHost: Bool = false
     var hostRound: Int = 0
+    var peersWereNearbyAtHostStart: Bool = false
     var toast: ToastMessage?
 
     func showToast(_ message: String, duration: Double = 3.0, x: CGFloat = 0.5, y: CGFloat = 0.5) {
@@ -113,6 +114,7 @@ final class SessionManager {
     // MARK: - Host
 
     func startHosting() {
+        peersWereNearbyAtHostStart = !nearbyReadyPeerNames.isEmpty
         role = .host
         stopBrowser()
         stopReadyListener()
@@ -120,7 +122,7 @@ final class SessionManager {
         primeAudio()
         #if DEBUG
         print("[HOST] Started hosting session")
-        startSimulatedCharacters()
+        // startSimulatedCharacters()
         #endif
     }
 
@@ -820,6 +822,7 @@ final class SessionManager {
         hostName = ""
         reconnectAttempts = 0
         wantsToJoin = false
+        peersWereNearbyAtHostStart = false
         lastBrowseResults = []
         announcedHosts = []
     }

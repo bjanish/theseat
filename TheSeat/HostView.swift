@@ -78,9 +78,20 @@ struct HostView: View {
             Spacer()
             GlowView()
             Spacer().frame(height: 50)
-            Text("Waiting for questions...")
-                .font(.title3)
-                .foregroundStyle(.white.opacity(0.5))
+            if sessionManager.connectedPeers.isEmpty && !sessionManager.peersWereNearbyAtHostStart {
+                (Text("Invite your friends\nto open ")
+                 + Text("The Seat").bold().foregroundColor(.white))
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.5))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            } else {
+                Text("Waiting for questions...")
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.5))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
             Spacer()
         }
     }
