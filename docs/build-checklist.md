@@ -170,7 +170,9 @@ Spec order = build order. Each section done-done before moving to the next.
 
 ---
 
-## 13. Solo Mode: Would You Answer?
+## 13. Solo Mode: Would You Answer? (POST-LAUNCH)
+
+*Cut from v1. Revisit after ship if retention data supports it.*
 
 - [ ] Random questions from curated pool
 - [ ] Swipe right = "I'd answer that" → streak increments
