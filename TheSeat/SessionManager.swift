@@ -200,13 +200,16 @@ final class SessionManager {
         #if DEBUG
         stopSimulatedCharacters()
         #endif
+        let hadPlayers = !connectedPeers.isEmpty
         sendToAllPlayers(.sessionEnd)
         // Tear down after a brief moment to let the message send
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             self?.tearDown()
             self?.role = .solo
             self?.announcedHosts = []
-            self?.showToast("The Seat is empty", y: 0.04)
+            if hadPlayers {
+                self?.showToast("The Seat is empty", y: 0.04)
+            }
             // Restart browser after delay so other phones can see future hosts
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 self?.startBrowser()
