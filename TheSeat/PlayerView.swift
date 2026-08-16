@@ -4,6 +4,7 @@ struct PlayerView: View {
     @Environment(SessionManager.self) private var sessionManager
     @State private var questionText = ""
     @State private var hasAsked = false
+    @State private var pendingQuestion: String?
     @FocusState private var isInputFocused: Bool
 
     private let characterLimit = 150
@@ -27,9 +28,11 @@ struct PlayerView: View {
 
                 Spacer()
 
-                // Input area or confirmation
+                // Input area, confirmation review, or sent state
                 if hasAsked {
                     sentConfirmation
+                } else if let pending = pendingQuestion {
+                    confirmationReview(pending)
                 } else {
                     inputArea
                 }
@@ -37,9 +40,11 @@ struct PlayerView: View {
         }
         .onAppear {
             hasAsked = false
+            pendingQuestion = nil
         }
         .onChange(of: sessionManager.hostRound) { _, _ in
             hasAsked = false
+            pendingQuestion = nil
             questionText = ""
         }
         .toast(Binding(
@@ -90,6 +95,55 @@ struct PlayerView: View {
         .padding(.bottom, 40)
     }
 
+    // MARK: - Confirmation Review
+
+    private func confirmationReview(_ question: String) -> some View {
+        VStack(spacing: 24) {
+            Text("Send this?")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.5))
+
+            Text(question)
+                .font(.custom("Cinzel-Regular", size: 20))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 30)
+
+            HStack(spacing: 20) {
+                Button {
+                    pendingQuestion = nil
+                    isInputFocused = true
+                } label: {
+                    Text("Go back")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                }
+
+                Button {
+                    confirmSend(question)
+                } label: {
+                    Text("Send")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(gold.opacity(0.3))
+                                .stroke(gold, lineWidth: 1)
+                        )
+                }
+            }
+        }
+        .padding(.bottom, 40)
+    }
+
     // MARK: - Input Area
 
     private var inputArea: some View {
@@ -115,7 +169,7 @@ struct PlayerView: View {
                     )
 
                 Button {
-                    sendQuestion()
+                    requestConfirmation()
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 32))
@@ -138,12 +192,17 @@ struct PlayerView: View {
 
     // MARK: - Actions
 
-    private func sendQuestion() {
+    private func requestConfirmation() {
         let trimmed = questionText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+        isInputFocused = false
+        pendingQuestion = trimmed
+    }
 
-        sessionManager.sendQuestion(trimmed)
+    private func confirmSend(_ question: String) {
+        sessionManager.sendQuestion(question)
         questionText = ""
+        pendingQuestion = nil
         hasAsked = true
 
         // Light haptic

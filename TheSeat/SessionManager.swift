@@ -306,6 +306,7 @@ final class SessionManager {
         hostConnection = nil
         role = .solo
         hostName = ""
+        currentDisplayedQuestion = nil
         reconnectAttempts = 0
         startBrowser()
         // Clear lastLeftHostName after 3 seconds so player can rejoin
@@ -576,7 +577,7 @@ final class SessionManager {
             }
         }
 
-        nearbyReadyPeerNames = Array(Set(readyPeerNames)).sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        nearbyReadyPeerNames = readyPeerNames.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 
         // If the host we left is no longer visible, clear lastLeftHostName
         if let leftHost = lastLeftHostName,
@@ -731,10 +732,14 @@ final class SessionManager {
             connectionNames[id] = finalName
             connectedPeers.append(finalName)
             showToast("\(finalName) joined", y: 0.12)
+            send(.welcome(hostName: playerName), to: connection)
 
             #if DEBUG
             print("[HOST] Player joined: \(finalName) (device: \(incomingDeviceID))")
             #endif
+
+        case .welcome(let name):
+            hostName = name
 
         case .question(let text):
             let formatted = text.hasSuffix("?") ? text : text + "?"
