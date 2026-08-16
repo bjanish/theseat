@@ -90,8 +90,8 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Field clears after send
 - [x] ONE question per HOST — input locks after sending, resets on seat pass
 - [x] After send: show "Your question is in" + "Stay connected" confirmation
-- [ ] Confirmation modal before sending — player reviews question before committing
-- [ ] Trim + reject empty whitespace
+- [x] Confirmation modal before sending — player reviews question before committing
+- [x] Trim + reject empty whitespace
 
 ---
 
