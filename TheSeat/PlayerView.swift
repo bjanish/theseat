@@ -21,9 +21,13 @@ struct PlayerView: View {
 
                 Spacer()
 
-                // Current question display (shared screen moment)
+                // Current question display OR chair
                 if let currentQuestion = sessionManager.currentDisplayedQuestion {
                     sharedQuestion(currentQuestion)
+                } else {
+                    // Chair with glow (60% opacity, hides when question is displayed)
+                    GlowView()
+                        .opacity(0.6)
                 }
 
                 Spacer()
@@ -46,6 +50,14 @@ struct PlayerView: View {
             hasAsked = false
             pendingQuestion = nil
             questionText = ""
+        }
+        .onChange(of: sessionManager.questionDeliveryFailed) { _, failed in
+            if failed {
+                hasAsked = false
+                pendingQuestion = nil
+                sessionManager.questionDeliveryFailed = false
+                sessionManager.showToast("Couldn't deliver — try again")
+            }
         }
         .toast(Binding(
             get: { sessionManager.toast },

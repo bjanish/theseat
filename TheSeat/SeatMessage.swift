@@ -4,6 +4,7 @@ enum SeatMessage: Codable, Sendable {
     case join(name: String, deviceID: String)
     case welcome(hostName: String)
     case question(text: String)
+    case questionReceived
     case currentQuestion(text: String)
     case passTheSeat(toName: String)
     case youAreHost

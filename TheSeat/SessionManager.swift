@@ -25,6 +25,7 @@ final class SessionManager {
     var hostRound: Int = 0
     var peersWereNearbyAtHostStart: Bool = false
     var toast: ToastMessage?
+    var questionDeliveryFailed: Bool = false
 
     func showToast(_ message: String, duration: Double = 3.0, x: CGFloat = 0.5, y: CGFloat = 0.5) {
         let newToast = ToastMessage(text: message, duration: duration, x: x, y: y)
@@ -249,6 +250,8 @@ final class SessionManager {
 
     @ObservationIgnored private var wantsToJoin: Bool = false
     @ObservationIgnored private var lastBrowseResults: Set<NWBrowser.Result> = []
+    @ObservationIgnored private var pendingQuestionText: String?
+    @ObservationIgnored private var ackTimeoutID: UUID?
 
     func joinSession() {
         wantsToJoin = true
@@ -293,7 +296,22 @@ final class SessionManager {
 
     func sendQuestion(_ text: String) {
         guard let connection = hostConnection else { return }
+        pendingQuestionText = text
         send(.question(text: text), to: connection)
+
+        // Start ack timeout — if no .questionReceived in 2s, notify player
+        let timeoutID = UUID()
+        ackTimeoutID = timeoutID
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            guard let self, self.ackTimeoutID == timeoutID, self.pendingQuestionText != nil else { return }
+            // Question didn't get through — reset so player can retry
+            self.pendingQuestionText = nil
+            self.ackTimeoutID = nil
+            self.questionDeliveryFailed = true
+            #if DEBUG
+            print("[PLAYER] No ack received — delivery failed")
+            #endif
+        }
     }
 
     func leaveSession() {
@@ -305,6 +323,9 @@ final class SessionManager {
         hostName = ""
         currentDisplayedQuestion = nil
         reconnectAttempts = 0
+        pendingQuestionText = nil
+        ackTimeoutID = nil
+        questionDeliveryFailed = false
         startBrowser()
         // Clear lastLeftHostName after 3 seconds so player can rejoin
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
@@ -625,7 +646,7 @@ final class SessionManager {
             role = .player
             stopBrowser()
             stopReadyListener()
-            showToast(hostName.isEmpty ? "Connected" : "\(hostName) is in The Seat")
+            showToast(hostName.isEmpty ? "Connected" : "\(hostName) is in The Seat", y: 0.3)
             #if DEBUG
             print("[CONNECT] Connected to host")
             #endif
@@ -760,6 +781,8 @@ final class SessionManager {
         case .question(let text):
             let formatted = text.hasSuffix("?") ? text : text + "?"
             questionQueue.insert(formatted, at: 0)
+            // Send ack back to player
+            send(.questionReceived, to: connection)
             // Ping + light haptic for host
             playPing()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -789,7 +812,7 @@ final class SessionManager {
             hostName = name
             hostRound += 1
             currentDisplayedQuestion = nil
-            showToast("\(name) is in The Seat")
+            showToast("\(name) is in The Seat", y: 0.3)
             #if DEBUG
             print("[PLAYER] New host: \(name)")
             #endif
@@ -808,6 +831,14 @@ final class SessionManager {
 
         case .heartbeat:
             break
+
+        case .questionReceived:
+            // Ack received — question was delivered successfully
+            pendingQuestionText = nil
+            ackTimeoutID = nil
+            #if DEBUG
+            print("[PLAYER] Question ack received")
+            #endif
         }
     }
 
@@ -837,6 +868,9 @@ final class SessionManager {
         reconnectAttempts = 0
         wantsToJoin = false
         peersWereNearbyAtHostStart = false
+        pendingQuestionText = nil
+        ackTimeoutID = nil
+        questionDeliveryFailed = false
         lastBrowseResults = []
     }
 }
