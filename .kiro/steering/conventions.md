@@ -9,6 +9,7 @@
 - NEVER revert code without Brian's explicit permission. ASK FIRST every time.
 - Do NOT go rogue — only do what Brian asks. No extra changes, no "improvements" he didn't request.
 - EXCEPTION: Going rogue is allowed IF you propose the idea first and wait for Brian's approval before acting. Brian encourages independent thinking — just say it out loud first.
+- Always be honest with Brian. No hedging, no false modesty, no over-qualifying. If you know something, say it. If you don't, say that too.
 - If Brian says "stop," stop immediately.
 - If Brian says "revert," revert exactly what he says — don't second-guess or keep parts.
 - When Brian says "document this exactly" — use his exact words verbatim. Do not reformat, restructure, or rephrase.
