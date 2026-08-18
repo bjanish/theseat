@@ -25,7 +25,6 @@ final class SessionManager {
     var hostRound: Int = 0
     var peersWereNearbyAtHostStart: Bool = false
     var toast: ToastMessage?
-    var questionDeliveryFailed: Bool = false
 
     func showToast(_ message: String, duration: Double = 3.0, x: CGFloat = 0.5, y: CGFloat = 0.5) {
         let newToast = ToastMessage(text: message, duration: duration, x: x, y: y)
@@ -54,6 +53,7 @@ final class SessionManager {
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var readyListener: NWListener?
     @ObservationIgnored private var browser: NWBrowser?
+    @ObservationIgnored private var hostBrowser: NWBrowser?
     @ObservationIgnored private var hostConnection: NWConnection?
     @ObservationIgnored private var playerConnections: [NWConnection] = []
     @ObservationIgnored private var connectionNames: [ObjectIdentifier: String] = [:]
@@ -62,10 +62,11 @@ final class SessionManager {
     @ObservationIgnored private var connectionDeviceIDs: [ObjectIdentifier: String] = [:]
     @ObservationIgnored private var reconnectAttempts: Int = 0
     @ObservationIgnored private var lastLeftHostName: String?
+    @ObservationIgnored private var lastBrowseResults: Set<NWBrowser.Result> = []
+    @ObservationIgnored private var wantsToJoin: Bool = false
+    @ObservationIgnored private var keepAliveTimer: DispatchSourceTimer?
 
-    private let networkQueue = DispatchQueue(label: "com.bjanish.theseat.network")
     private let audioQueue = DispatchQueue(label: "com.bjanish.theseat.audio")
-
     private let serviceType = "_theseat._tcp"
 
     // MARK: - Audio
@@ -119,11 +120,12 @@ final class SessionManager {
         role = .host
         stopBrowser()
         stopReadyListener()
-        startListener()
+        startHostListener()
+        startHostBrowser()
+        startKeepAlive()
         primeAudio()
         #if DEBUG
         print("[HOST] Started hosting session")
-        // startSimulatedCharacters()
         #endif
     }
 
@@ -165,7 +167,6 @@ final class SessionManager {
     ]
 
     private func startSimulatedCharacters() {
-        // Add characters as connected peers with staggered joins (like real players)
         for (index, name) in characterNames.enumerated() {
             let delay = Double(index) * 1.5
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
@@ -175,9 +176,8 @@ final class SessionManager {
             }
         }
 
-        // Each character sends one question 10s after they join
         let shuffled = characterQuestions.shuffled()
-        for (index, name) in characterNames.enumerated() {
+        for (index, _) in characterNames.enumerated() {
             let joinDelay = Double(index) * 1.5
             let questionDelay = joinDelay + Double.random(in: 5.0...12.0)
             let question = shuffled[index]
@@ -187,24 +187,21 @@ final class SessionManager {
                 self.questionQueue.insert(formatted, at: 0)
                 self.playPing()
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                print("[CHARACTER] \(name) sent: \(question.prefix(30))...")
+                print("[CHARACTER] sent: \(question.prefix(30))...")
             }
         }
     }
-
     #endif
 
     func endSession() {
         let hadPlayers = !connectedPeers.isEmpty
         sendToAllPlayers(.sessionEnd)
-        // Tear down after a brief moment to let the message send
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             self?.tearDown()
             self?.role = .solo
             if hadPlayers {
                 self?.showToast("The Seat is empty", y: 0.04)
             }
-            // Restart browser after delay so other phones can see future hosts
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 self?.startBrowser()
             }
@@ -231,16 +228,11 @@ final class SessionManager {
               let connection = playerConnections.first(where: { ObjectIdentifier($0) == id }) else { return }
         send(.passTheSeat(toName: name), to: connection)
         send(.youAreHost, to: connection)
-
-        // Broadcast new host to all players
         sendToAllPlayers(.newHost(name: name))
-
-        // Transition self to player
         role = .player
         hostName = name
         questionQueue.removeAll()
         currentDisplayedQuestion = nil
-
         #if DEBUG
         print("[HOST] Passed the seat to \(name)")
         #endif
@@ -248,86 +240,42 @@ final class SessionManager {
 
     // MARK: - Player
 
-    @ObservationIgnored private var wantsToJoin: Bool = false
-    @ObservationIgnored private var lastBrowseResults: Set<NWBrowser.Result> = []
-    @ObservationIgnored private var pendingQuestionText: String?
-    @ObservationIgnored private var ackTimeoutID: UUID?
-
     func joinSession() {
         wantsToJoin = true
-        // If we already have browse results, process them now
-        if !lastBrowseResults.isEmpty {
-            handleBrowseResults(lastBrowseResults)
-        }
-    }
-
-    func connectToHost(endpoint: NWEndpoint) {
-        guard !isConnectingToHost else { return }
-        isConnectingToHost = true
-
+        // Bounce the ready listener to trigger a fresh Bonjour advertisement
+        // that the host's browser will see and attempt to connect to
+        stopReadyListener()
+        startReadyListener()
         #if DEBUG
-        print("[CONNECT] Connecting to: \(endpoint)")
+        print("[PLAYER] Wants to join — waiting for host to connect")
         #endif
-
-        let params = NWParameters.tcp
-        params.includePeerToPeer = true
-        let connection = NWConnection(to: endpoint, using: params)
-        hostConnection = connection
-
-        connection.stateUpdateHandler = { [weak self] state in
-            Task { @MainActor in
-                self?.handlePlayerConnectionState(state, connection: connection)
-            }
-        }
-
-        connection.start(queue: networkQueue)
-
-        // 3-second timeout
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
-            guard let self, self.isConnectingToHost, connection.state != .ready else { return }
-            connection.cancel()
-            self.isConnectingToHost = false
-            self.reconnectAttempts += 1
-            #if DEBUG
-            print("[CONNECT] Connection timeout")
-            #endif
-        }
     }
 
     func sendQuestion(_ text: String) {
         guard let connection = hostConnection else { return }
-        pendingQuestionText = text
         send(.question(text: text), to: connection)
-
-        // Start ack timeout — if no .questionReceived in 2s, notify player
-        let timeoutID = UUID()
-        ackTimeoutID = timeoutID
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            guard let self, self.ackTimeoutID == timeoutID, self.pendingQuestionText != nil else { return }
-            // Question didn't get through — reset so player can retry
-            self.pendingQuestionText = nil
-            self.ackTimeoutID = nil
-            self.questionDeliveryFailed = true
-            #if DEBUG
-            print("[PLAYER] No ack received — delivery failed")
-            #endif
-        }
+        #if DEBUG
+        print("[PLAYER] Question sent: \(text.prefix(30))...")
+        #endif
     }
 
     func leaveSession() {
         let leftHost = hostName
         lastLeftHostName = leftHost
+        stopKeepAlive()
+        stopReadyListener()
         hostConnection?.cancel()
         hostConnection = nil
         role = .solo
         hostName = ""
         currentDisplayedQuestion = nil
         reconnectAttempts = 0
-        pendingQuestionText = nil
-        ackTimeoutID = nil
-        questionDeliveryFailed = false
         startBrowser()
-        // Clear lastLeftHostName after 3 seconds so player can rejoin
+        // Restart ready listener after delay so host can't immediately reconnect
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+            guard let self, self.role == .solo else { return }
+            self.startReadyListener()
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
             if self?.lastLeftHostName == leftHost {
                 self?.lastLeftHostName = nil
@@ -345,6 +293,7 @@ final class SessionManager {
         case .host:
             endSession()
         case .player:
+            stopKeepAlive()
             hostConnection?.cancel()
             hostConnection = nil
             role = .solo
@@ -366,9 +315,9 @@ final class SessionManager {
         }
     }
 
-    // MARK: - Private: Listener
+    // MARK: - Private: Host Listener (advertises -host for discovery + accepts player connections)
 
-    private func startListener() {
+    private func startHostListener() {
         do {
             let params = NWParameters.tcp
             params.includePeerToPeer = true
@@ -388,7 +337,7 @@ final class SessionManager {
                 #endif
             }
 
-            listener.start(queue: networkQueue)
+            listener.start(queue: .main)
             self.listener = listener
         } catch {
             #if DEBUG
@@ -396,6 +345,94 @@ final class SessionManager {
             #endif
         }
     }
+
+    // MARK: - Private: Host Browser (finds -ready players and connects TO them)
+
+    private func startHostBrowser() {
+        let params = NWParameters()
+        params.includePeerToPeer = true
+        let hb = NWBrowser(for: .bonjour(type: serviceType, domain: nil), using: params)
+
+        hb.browseResultsChangedHandler = { [weak self] results, _ in
+            Task { @MainActor in
+                self?.handleHostBrowseResults(results)
+            }
+        }
+
+        hb.stateUpdateHandler = { state in
+            #if DEBUG
+            print("[HOST-BROWSER] State: \(state)")
+            #endif
+        }
+
+        hb.start(queue: .main)
+        hostBrowser = hb
+        #if DEBUG
+        print("[HOST-BROWSER] Started browsing for players")
+        #endif
+    }
+
+    private func stopHostBrowser() {
+        hostBrowser?.cancel()
+        hostBrowser = nil
+    }
+
+    private func handleHostBrowseResults(_ results: Set<NWBrowser.Result>) {
+        guard role == .host else { return }
+        let selfPrefix = "\(playerName)-\(deviceID)"
+
+        for result in results {
+            guard case let .service(name, _, _, _) = result.endpoint else { continue }
+            if name.hasPrefix(selfPrefix) { continue }
+
+            let parts = name.components(separatedBy: "-")
+            guard parts.count >= 3 else { continue }
+            let serviceState = parts.last
+
+            // Only connect to -ready services (players waiting to join)
+            guard serviceState == "ready" else { continue }
+
+            // Don't connect to players we already have
+            let endpointDesc = "\(result.endpoint)"
+            let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
+            guard !connectedEndpoints.contains(endpointBase) else { continue }
+
+            // Connect TO this player
+            #if DEBUG
+            let peerName = parts.dropLast(2).joined(separator: "-")
+            print("[HOST] Connecting to player: \(peerName) at \(result.endpoint)")
+            #endif
+            connectToPlayer(endpoint: result.endpoint)
+        }
+    }
+
+    private func connectToPlayer(endpoint: NWEndpoint) {
+        let params = NWParameters.tcp
+        params.includePeerToPeer = true
+        let connection = NWConnection(to: endpoint, using: params)
+
+        connection.stateUpdateHandler = { [weak self] state in
+            Task { @MainActor in
+                switch state {
+                case .ready:
+                    #if DEBUG
+                    print("[HOST] Connection to player ready")
+                    #endif
+                    self?.handleNewPlayerConnection(connection)
+                case .failed, .cancelled:
+                    #if DEBUG
+                    print("[HOST] Connection to player failed/cancelled")
+                    #endif
+                default:
+                    break
+                }
+            }
+        }
+
+        connection.start(queue: .main)
+    }
+
+    // MARK: - Private: Ready Listener (player advertises presence + accepts host connections)
 
     private func startReadyListener() {
         guard readyListener == nil, role == .solo else { return }
@@ -405,15 +442,20 @@ final class SessionManager {
             let rl = try NWListener(using: params)
             let serviceName = "\(playerName)-\(deviceID)-ready"
             rl.service = NWListener.Service(name: serviceName, type: serviceType)
-            rl.newConnectionHandler = { connection in
-                connection.cancel()
+
+            rl.newConnectionHandler = { [weak self] connection in
+                Task { @MainActor in
+                    self?.handleIncomingHostConnection(connection)
+                }
             }
+
             rl.stateUpdateHandler = { state in
                 #if DEBUG
                 print("[READY] Listener state: \(state)")
                 #endif
             }
-            rl.start(queue: networkQueue)
+
+            rl.start(queue: .main)
             readyListener = rl
         } catch {
             #if DEBUG
@@ -428,8 +470,45 @@ final class SessionManager {
         nearbyReadyPeerNames = []
     }
 
+    /// Player receives an incoming connection from the host
+    private func handleIncomingHostConnection(_ connection: NWConnection) {
+        // Only accept if we're solo AND the player has tapped Join
+        guard role == .solo, wantsToJoin else {
+            connection.cancel()
+            return
+        }
+        wantsToJoin = false
+
+        #if DEBUG
+        print("[PLAYER] Incoming connection from host")
+        #endif
+
+        isConnectingToHost = true
+        hostConnection = connection
+        role = .player
+        stopBrowser()
+
+        connection.stateUpdateHandler = { [weak self] state in
+            Task { @MainActor in
+                self?.handlePlayerConnectionState(state, connection: connection)
+            }
+        }
+
+        connection.start(queue: .main)
+
+        // Send join and start receive after brief delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self else { return }
+            self.isConnectingToHost = false
+            self.send(.join(name: self.playerName, deviceID: self.deviceID), to: connection)
+            self.receiveLoop(from: connection)
+            self.startKeepAlive()
+        }
+    }
+
+    // MARK: - Private: Handle New Player Connection (host side)
+
     private func handleNewPlayerConnection(_ connection: NWConnection) {
-        // Endpoint dedup — strip port to catch same device on different ports
         let endpointDesc = "\(connection.endpoint)"
         let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
         #if DEBUG
@@ -445,43 +524,67 @@ final class SessionManager {
         }
         connectedEndpoints.insert(endpointBase)
 
-        connection.stateUpdateHandler = { [weak self] state in
-            Task { @MainActor in
-                switch state {
-                case .ready:
-                    #if DEBUG
-                    print("[HOST] Player connection ready")
-                    #endif
-                    // Start receive loop after brief delay
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        self?.receiveLoop(from: connection)
-                    }
-                    // Timeout — if no .join received in 3 seconds, cancel
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
-                        guard let self else { return }
-                        let id = ObjectIdentifier(connection)
-                        if self.connectionNames[id] == nil {
-                            // Never got a .join — ghost connection
-                            connection.cancel()
-                            self.playerConnections.removeAll { $0 === connection }
-                            let endpointDesc = "\(connection.endpoint)"
-                            let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
-                            self.connectedEndpoints.remove(endpointBase)
-                            #if DEBUG
-                            print("[HOST] Ghost connection timed out — no .join received")
-                            #endif
+        // If connection isn't ready yet (came from listener), set up state handler
+        if connection.state != .ready {
+            connection.stateUpdateHandler = { [weak self] state in
+                Task { @MainActor in
+                    switch state {
+                    case .ready:
+                        #if DEBUG
+                        print("[HOST] Player connection ready")
+                        #endif
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            self?.receiveLoop(from: connection)
                         }
+                        // Ghost timeout
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+                            guard let self else { return }
+                            let id = ObjectIdentifier(connection)
+                            if self.connectionNames[id] == nil {
+                                connection.cancel()
+                                self.playerConnections.removeAll { $0 === connection }
+                                let endpointDesc = "\(connection.endpoint)"
+                                let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
+                                self.connectedEndpoints.remove(endpointBase)
+                                #if DEBUG
+                                print("[HOST] Ghost connection timed out — no .join received")
+                                #endif
+                            }
+                        }
+                    case .failed, .cancelled:
+                        self?.handleHostDisconnect(connection)
+                    default:
+                        break
                     }
-                case .failed, .cancelled:
-                    self?.handleHostDisconnect(connection)
-                default:
-                    break
+                }
+            }
+            connection.start(queue: .main)
+            playerConnections.append(connection)
+        } else {
+            // Already ready (came from host-initiated connectToPlayer)
+            #if DEBUG
+            print("[HOST] Player connection ready")
+            #endif
+            playerConnections.append(connection)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                self?.receiveLoop(from: connection)
+            }
+            // Ghost timeout
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+                guard let self else { return }
+                let id = ObjectIdentifier(connection)
+                if self.connectionNames[id] == nil {
+                    connection.cancel()
+                    self.playerConnections.removeAll { $0 === connection }
+                    let endpointDesc = "\(connection.endpoint)"
+                    let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
+                    self.connectedEndpoints.remove(endpointBase)
+                    #if DEBUG
+                    print("[HOST] Ghost connection timed out — no .join received")
+                    #endif
                 }
             }
         }
-
-        connection.start(queue: networkQueue)
-        playerConnections.append(connection)
     }
 
     private func handleHostDisconnect(_ connection: NWConnection) {
@@ -502,25 +605,18 @@ final class SessionManager {
         connectionNames.removeValue(forKey: id)
         connectionDeviceIDs.removeValue(forKey: id)
         playerConnections.removeAll { $0 === connection }
-
-        // End session if last player left
-        if connectedPeers.isEmpty && role == .host {
-            // Don't auto-end — host still needs to see/answer questions
-            // Host ends manually with "End" button
-        }
     }
 
-    // MARK: - Private: Browser
+    // MARK: - Private: Solo Browser (finds hosts + ready peers for UI)
 
     func startBrowser() {
         guard role == .solo else { return }
 
         startReadyListener()
 
-        // Don't start if already browsing
         guard browser == nil else { return }
 
-        let params = NWParameters.tcp
+        let params = NWParameters()
         params.includePeerToPeer = true
         let browser = NWBrowser(for: .bonjour(type: serviceType, domain: nil), using: params)
 
@@ -541,7 +637,7 @@ final class SessionManager {
             }
         }
 
-        browser.start(queue: networkQueue)
+        browser.start(queue: .main)
         self.browser = browser
 
         #if DEBUG
@@ -564,8 +660,6 @@ final class SessionManager {
 
         for result in results {
             guard case let .service(name, _, _, _) = result.endpoint else { continue }
-
-            // Self-filter
             if name.hasPrefix(selfPrefix) { continue }
 
             let parts = name.components(separatedBy: "-")
@@ -579,17 +673,11 @@ final class SessionManager {
                 if !peerName.isEmpty {
                     readyPeerNames.append(peerName)
                 }
-
             case "host":
                 visibleHostServiceNames.insert(name)
-
-                // Skip intentionally left host
                 if let leftHost = lastLeftHostName, name.contains(leftHost) { continue }
-
-                // Circuit breaker
                 guard reconnectAttempts < 3, discoveredHost == nil else { continue }
                 discoveredHost = (peerName, result.endpoint)
-
             default:
                 continue
             }
@@ -602,7 +690,6 @@ final class SessionManager {
         print("[BROWSE] Ready peers: \(nearbyReadyPeerNames), Hosts: \(hostServices)")
         #endif
 
-        // If the host we left is no longer visible, clear lastLeftHostName
         if let leftHost = lastLeftHostName,
            !visibleHostServiceNames.contains(where: { $0.contains(leftHost) }) {
             lastLeftHostName = nil
@@ -611,21 +698,12 @@ final class SessionManager {
         guard role == .solo else { return }
 
         if let discoveredHost {
-            if wantsToJoin && !isConnectingToHost {
-                hostName = discoveredHost.name
+            if hostName != discoveredHost.name {
                 #if DEBUG
-                print("[BROWSE] hostName set (joining): \(discoveredHost.name)")
+                print("[BROWSE] hostName changed: \(hostName) → \(discoveredHost.name)")
                 #endif
-                wantsToJoin = false
-                connectToHost(endpoint: discoveredHost.endpoint)
-            } else if !wantsToJoin && !isConnectingToHost {
-                if hostName != discoveredHost.name {
-                    #if DEBUG
-                    print("[BROWSE] hostName changed: \(hostName) → \(discoveredHost.name)")
-                    #endif
-                }
-                hostName = discoveredHost.name
             }
+            hostName = discoveredHost.name
         } else {
             if !hostName.isEmpty {
                 #if DEBUG
@@ -641,25 +719,13 @@ final class SessionManager {
     private func handlePlayerConnectionState(_ state: NWConnection.State, connection: NWConnection) {
         switch state {
         case .ready:
-            isConnectingToHost = false
-            reconnectAttempts = 0
-            role = .player
-            stopBrowser()
-            stopReadyListener()
-            showToast(hostName.isEmpty ? "Connected" : "\(hostName) is in The Seat", y: 0.3)
-            #if DEBUG
-            print("[CONNECT] Connected to host")
-            #endif
-            // Send join and start receive after brief delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-                guard let self else { return }
-                self.send(.join(name: self.playerName, deviceID: self.deviceID), to: connection)
-                self.receiveLoop(from: connection)
-            }
+            // Connection already handled in handleIncomingHostConnection
+            break
         case .failed, .cancelled:
             guard hostConnection === connection else { return }
             isConnectingToHost = false
             hostConnection = nil
+            stopKeepAlive()
             if role == .player {
                 role = .solo
                 hostName = ""
@@ -692,10 +758,37 @@ final class SessionManager {
         }
     }
 
+    // MARK: - Keep-Alive (prevents AWDL from going idle)
+
+    private func startKeepAlive() {
+        guard keepAliveTimer == nil else { return }
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 2.0, repeating: 2.0)
+        timer.setEventHandler { [weak self] in
+            guard let self else { return }
+            switch self.role {
+            case .host:
+                self.sendToAllPlayers(.heartbeat)
+            case .player:
+                if let connection = self.hostConnection {
+                    self.send(.heartbeat, to: connection)
+                }
+            case .solo:
+                break
+            }
+        }
+        timer.resume()
+        keepAliveTimer = timer
+    }
+
+    private func stopKeepAlive() {
+        keepAliveTimer?.cancel()
+        keepAliveTimer = nil
+    }
+
     private func receiveLoop(from connection: NWConnection) {
-        // Read 4-byte length prefix
         connection.receive(minimumIncompleteLength: 4, maximumLength: 4) { [weak self] data, _, _, error in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 guard let self else { return }
                 guard let data, data.count == 4 else {
                     self.handleDisconnect(connection)
@@ -709,7 +802,7 @@ final class SessionManager {
 
     private func receiveBody(from connection: NWConnection, length: Int) {
         connection.receive(minimumIncompleteLength: length, maximumLength: length) { [weak self] data, _, _, error in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 guard let self else { return }
                 guard let data else {
                     self.handleDisconnect(connection)
@@ -718,7 +811,6 @@ final class SessionManager {
                 if let message = try? JSONDecoder().decode(SeatMessage.self, from: data) {
                     self.handleMessage(message, from: connection)
                 }
-                // Continue receiving
                 self.receiveLoop(from: connection)
             }
         }
@@ -726,8 +818,8 @@ final class SessionManager {
 
     private func handleDisconnect(_ connection: NWConnection) {
         if connection === hostConnection {
-            // Player side — host dropped
             hostConnection = nil
+            stopKeepAlive()
             if role == .player {
                 role = .solo
                 hostName = ""
@@ -738,7 +830,6 @@ final class SessionManager {
                 startBrowser()
             }
         } else {
-            // Host side — player dropped
             handleHostDisconnect(connection)
         }
     }
@@ -746,13 +837,11 @@ final class SessionManager {
     private func handleMessage(_ message: SeatMessage, from connection: NWConnection) {
         switch message {
         case .join(let name, let incomingDeviceID):
-            // Dedup by device ID
             guard !connectedDeviceIDs.contains(incomingDeviceID) else {
                 connection.cancel()
                 return
             }
 
-            // Same-name handling
             var finalName = name
             if connectedPeers.contains(name) {
                 var suffix = 2
@@ -774,6 +863,8 @@ final class SessionManager {
 
         case .welcome(let name):
             hostName = name
+            stopReadyListener()
+            showToast("\(name) is in The Seat")
             #if DEBUG
             print("[PLAYER] Host name updated via welcome: \(name)")
             #endif
@@ -781,9 +872,6 @@ final class SessionManager {
         case .question(let text):
             let formatted = text.hasSuffix("?") ? text : text + "?"
             questionQueue.insert(formatted, at: 0)
-            // Send ack back to player
-            send(.questionReceived, to: connection)
-            // Ping + light haptic for host
             playPing()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             #if DEBUG
@@ -812,7 +900,7 @@ final class SessionManager {
             hostName = name
             hostRound += 1
             currentDisplayedQuestion = nil
-            showToast("\(name) is in The Seat", y: 0.3)
+            showToast("\(name) is in The Seat")
             #if DEBUG
             print("[PLAYER] New host: \(name)")
             #endif
@@ -831,23 +919,17 @@ final class SessionManager {
 
         case .heartbeat:
             break
-
-        case .questionReceived:
-            // Ack received — question was delivered successfully
-            pendingQuestionText = nil
-            ackTimeoutID = nil
-            #if DEBUG
-            print("[PLAYER] Question ack received")
-            #endif
         }
     }
 
     // MARK: - Private: Teardown
 
     private func tearDown() {
+        stopKeepAlive()
         listener?.cancel()
         listener = nil
         stopReadyListener()
+        stopHostBrowser()
         browser?.cancel()
         browser = nil
         hostConnection?.cancel()
@@ -868,9 +950,6 @@ final class SessionManager {
         reconnectAttempts = 0
         wantsToJoin = false
         peersWereNearbyAtHostStart = false
-        pendingQuestionText = nil
-        ackTimeoutID = nil
-        questionDeliveryFailed = false
         lastBrowseResults = []
     }
 }

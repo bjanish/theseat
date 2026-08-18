@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Remind: Propose Before Changes",
+      "trigger": "SessionStart",
+      "description": "One-time reminder at session start of the propose-before-changes rule, instead of gating every individual file write.",
+      "action": {
+        "type": "agent",
+        "prompt": "Reminder: never make code changes without Brian's explicit go-ahead. Tell him what you're about to change and wait for his confirmation before the first edit of that change. Once he approves, proceed through all the file edits for that change without re-asking on each individual file."
+      }
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Seat</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #title {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: clamp(28px, 6vw, 64px);
+            letter-spacing: 12px;
+            color: #d4a84b;
+            text-shadow: 0 0 30px rgba(212, 168, 75, 0.4), 0 0 60px rgba(212, 168, 75, 0.2);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #subtitle {
+            position: absolute;
+            top: calc(5% + clamp(40px, 8vw, 80px));
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: clamp(12px, 2vw, 18px);
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.4);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #hint {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            user-select: none;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="title">THE SEAT</div>
+    <div id="subtitle">Ask anything. Anonymously.</div>
+    <div id="hint">tap the chair</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0a0a0a, 0.012);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2.5, 6);
+        camera.lookAt(0, 1.7, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        document.body.appendChild(renderer.domElement);
+
+        const goldColor = new THREE.Color(0xd4a84b);
+        const chairGroup = new THREE.Group();
+        let glowRingMat = null;
+
+        // Load the actual chair image as a textured plane
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load('chair.png', (texture) => {
+            const aspect = texture.image.width / texture.image.height;
+            const height = 4;
+            const width = height * aspect;
+
+            const chairMat = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 0.7,
+                side: THREE.DoubleSide
+            });
+
+            const chairGeo = new THREE.PlaneGeometry(width, height);
+            const chairMesh = new THREE.Mesh(chairGeo, chairMat);
+            chairMesh.position.y = height / 2 - 0.8;
+            chairGroup.add(chairMesh);
+        });
+
+        scene.add(chairGroup);
+
+        // No visible cone — just actual lighting from above
+        // Spotlight already handles illumination
+
+        // Ambient light
+        const ambient = new THREE.AmbientLight(0x222222, 1.0);
+        scene.add(ambient);
+
+        // Spotlight from directly above
+        const spotlight = new THREE.SpotLight(0xffeedd, 4, 15, Math.PI / 5, 0.4, 1);
+        spotlight.position.set(0, 12, 0);
+        spotlight.target.position.set(0, 2, 0);
+        scene.add(spotlight);
+        scene.add(spotlight.target);
+
+        // Particles (dust in spotlight)
+        const particleCount = 150;
+        const particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = [];
+
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 3;
+            positions[i * 3 + 1] = Math.random() * 8;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 3;
+            velocities.push({
+                x: (Math.random() - 0.5) * 0.001,
+                y: -Math.random() * 0.004 - 0.001,
+                z: (Math.random() - 0.5) * 0.001
+            });
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMat = new THREE.PointsMaterial({
+            color: 0xffeedd,
+            size: 0.025,
+            transparent: true,
+            opacity: 0.5,
+            blending: THREE.AdditiveBlending
+        });
+        const particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+
+        // Glow state
+        let glowIntensity = 0;
+        let glowTarget = 0;
+
+        // Click/tap detection
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function onPointerDown(event) {
+            const x = event.clientX || (event.touches && event.touches[0].clientX);
+            const y = event.clientY || (event.touches && event.touches[0].clientY);
+            mouse.x = (x / window.innerWidth) * 2 - 1;
+            mouse.y = -(y / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(chairGroup.children);
+            if (intersects.length > 0) {
+                glowTarget = 1.0;
+                setTimeout(() => { glowTarget = 0; }, 1200);
+            }
+        }
+
+        window.addEventListener('pointerdown', onPointerDown);
+
+        // Animation
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.005;
+
+            // Gentle sway
+            chairGroup.rotation.y = Math.sin(time * 0.4) * 0.15;
+            chairGroup.position.y = Math.sin(time * 0.8) * 0.05;
+
+            // Glow
+            glowIntensity += (glowTarget - glowIntensity) * 0.04;
+            spotlight.intensity = 2 + glowIntensity * 3;
+
+            // Particles
+            const pos = particleGeo.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                pos[i * 3] += velocities[i].x;
+                pos[i * 3 + 1] += velocities[i].y;
+                pos[i * 3 + 2] += velocities[i].z;
+                if (pos[i * 3 + 1] < 0) {
+                    pos[i * 3] = (Math.random() - 0.5) * 3;
+                    pos[i * 3 + 1] = 8;
+                    pos[i * 3 + 2] = (Math.random() - 0.5) * 3;
+                }
+            }
+            particleGeo.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
