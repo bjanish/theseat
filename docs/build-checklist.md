@@ -1,5 +1,7 @@
 # The Seat — Build Checklist
 
+**Release target: August 31, 2026**
+
 Spec order = build order. Each section done-done before moving to the next.
 
 ---
@@ -31,9 +33,9 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Toast system for connection events
 - [x] Browser runs passively on solo screen, shows host name on Join button
 - [x] Ghost connection timeout (3s — no .join received)
-- [ ] Test host-to-player on two real phones (second session reconnect)
-- [ ] Verify auto-reconnect after player resume from background
-- [ ] Test without WiFi (AWDL peer-to-peer only)
+- [x] Test host-to-player on two real phones (second session reconnect)
+- [x] Verify auto-reconnect after player resume from background
+- [x] Test without WiFi (AWDL peer-to-peer only)
 
 ---
 

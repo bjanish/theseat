@@ -468,15 +468,16 @@
         <img src="chair.png" style="width: 140px; margin-bottom: 16px; opacity: 0.9;">
         <h1 id="title">The Seat</h1>
         <div class="subtitle">Build Checklist</div>
+        <div class="subtitle" style="font-size: 12px; margin-top: 6px; color: var(--gold);">Release target: August 31, 2026</div>
         <div class="progress-container">
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 83%"></div>
+                <div class="progress-fill" style="width: 81%"></div>
             </div>
-            <span class="progress-text">83%</span>
+            <span class="progress-text">81%</span>
         </div>
         <div class="stats">
-            <div class="stat"><span class="stat-number">105</span><span class="stat-label">Done</span></div>
-            <div class="stat"><span class="stat-number">22</span><span class="stat-label">Remaining</span></div>
+            <div class="stat"><span class="stat-number">108</span><span class="stat-label">Done</span></div>
+            <div class="stat"><span class="stat-number">25</span><span class="stat-label">Remaining</span></div>
             <div class="stat"><span class="stat-number">17</span><span class="stat-label">Sections</span></div>
         </div>
     </div>
@@ -495,7 +496,7 @@
 
     <div class="divider"></div>
 
-    <h2 onclick="toggleSection(this)">2. Networking <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 82%"></span></span><span class="section-count">14/17</span></span></h2>
+    <h2 onclick="toggleSection(this)">2. Networking <span class="section-meta"><span class="section-bar"><span class="section-bar-fill" style="width: 100%"></span></span><span class="section-count">17/17</span></span></h2>
     <div class="section-content">
         <ul>
             <li class="done">NWBrowser + NWListener + NWConnection, <code>includePeerToPeer = true</code></li>
@@ -512,9 +513,9 @@
             <li class="done">Toast system for connection events</li>
             <li class="done">Browser runs passively on solo screen, shows host name on Join button</li>
             <li class="done">Ghost connection timeout (3s — no .join received)</li>
-            <li class="todo">Test host-to-player on two real phones (second session reconnect)</li>
-            <li class="todo">Verify auto-reconnect after player resume from background</li>
-            <li class="todo">Test without WiFi (AWDL peer-to-peer only)</li>
+            <li class="done">Test host-to-player on two real phones (second session reconnect)</li>
+            <li class="done">Verify auto-reconnect after player resume from background</li>
+            <li class="done">Test without WiFi (AWDL peer-to-peer only)</li>
         </ul>
     </div>
 

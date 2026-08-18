@@ -156,11 +156,13 @@ struct PlayerView: View {
                 TextField("Ask anything...", text: $questionText, axis: .vertical)
                     .lineLimit(1...3)
                     .keyboardType(.default)
-                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.sentences)
                     .focused($isInputFocused)
                     .onChange(of: questionText) { _, newValue in
                         if newValue.count > characterLimit {
                             questionText = String(newValue.prefix(characterLimit))
+                        } else if let first = newValue.first, first.isLowercase {
+                            questionText = newValue.prefix(1).uppercased() + newValue.dropFirst()
                         }
                     }
                     .padding(.vertical, 8)

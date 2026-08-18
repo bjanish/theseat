@@ -242,9 +242,14 @@ final class SessionManager {
     // MARK: - Player
 
     func joinSession() {
+        guard !wantsToJoin else { return }
         wantsToJoin = true
+        // Bounce the ready listener to force fresh Bonjour advertisement
+        // This ensures the host's browser sees a new result and retries connection
+        stopReadyListener()
+        startReadyListener()
         #if DEBUG
-        print("[PLAYER] Wants to join — waiting for host to connect")
+        print("[PLAYER] Wants to join — bounced ready listener, waiting for host to connect")
         #endif
     }
 
@@ -906,6 +911,7 @@ final class SessionManager {
 
         case .youAreHost:
             role = .host
+            peersWereNearbyAtHostStart = true
             questionQueue.removeAll()
             currentDisplayedQuestion = nil
 
