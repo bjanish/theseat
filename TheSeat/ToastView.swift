@@ -9,6 +9,7 @@ struct ToastView: View {
             .font(.subheadline)
             .fontWeight(.medium)
             .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
             .background(

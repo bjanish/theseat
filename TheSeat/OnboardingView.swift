@@ -1,10 +1,18 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @Environment(SessionManager.self) private var sessionManager
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     @State private var currentPage = 0
+    @State private var lastSlideButtonEnabled = false
 
     private let gold = Color(red: 0.85, green: 0.70, blue: 0.40)
+
+    init() {
+        let gold = UIColor(red: 0.85, green: 0.70, blue: 0.40, alpha: 1.0)
+        UIPageControl.appearance().currentPageIndicatorTintColor = gold
+        UIPageControl.appearance().pageIndicatorTintColor = gold.withAlphaComponent(0.3)
+    }
 
     var body: some View {
         ZStack {
@@ -20,6 +28,17 @@ struct OnboardingView: View {
                     slide4.tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
+                .onChange(of: currentPage) { _, newPage in
+                    if newPage == 4 {
+                        lastSlideButtonEnabled = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            if currentPage == 4 {
+                                lastSlideButtonEnabled = true
+                                sessionManager.startBrowser()
+                            }
+                        }
+                    }
+                }
 
                 Button {
                     if currentPage < 4 {
@@ -38,7 +57,9 @@ struct OnboardingView: View {
                                 .fill(gold.opacity(0.3))
                                 .stroke(gold, lineWidth: 1)
                         )
+                        .opacity(currentPage == 4 && !lastSlideButtonEnabled ? 0.4 : 1.0)
                 }
+                .disabled(currentPage == 4 && !lastSlideButtonEnabled)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 40)
             }
@@ -58,8 +79,7 @@ struct OnboardingView: View {
                 .shadow(color: gold.opacity(0.4), radius: 12, x: 0, y: 4)
 
             Text("Take the seat.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
 
             Text("Answer anything.")
@@ -77,13 +97,12 @@ struct OnboardingView: View {
             Image(systemName: "person.3.fill")
                 .font(.system(size: 60))
                 .frame(height: 70)
-                .offset(y: 1)
                 .foregroundStyle(gold)
 
             Text("Friends connect anonymously.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
 
             Text("Questions appear.\nNobody knows who asked what.")
                 .font(.body)
@@ -101,12 +120,10 @@ struct OnboardingView: View {
             Image(systemName: "hand.tap.fill")
                 .font(.system(size: 60))
                 .frame(height: 70)
-                .offset(y: -5)
                 .foregroundStyle(gold)
 
             Text("You pick what to answer.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
 
             Text("Swipe through questions.\nTap to choose one.")
@@ -125,12 +142,10 @@ struct OnboardingView: View {
             Image(systemName: "person.line.dotted.person.fill")
                 .font(.system(size: 60))
                 .frame(height: 70)
-                .offset(y: -9)
                 .foregroundStyle(gold)
 
             Text("Pass the seat.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
 
             Text("Choose who's next.")
@@ -152,8 +167,7 @@ struct OnboardingView: View {
                 .foregroundStyle(.green)
 
             Text("One more thing —")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
 
             Text("Tap \"Allow\" on the next pop-up\nso we can find players nearby.")
@@ -168,4 +182,5 @@ struct OnboardingView: View {
 
 #Preview {
     OnboardingView()
+        .environment(SessionManager())
 }

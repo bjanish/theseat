@@ -51,14 +51,6 @@ struct PlayerView: View {
             pendingQuestion = nil
             questionText = ""
         }
-        .onChange(of: sessionManager.questionDeliveryFailed) { _, failed in
-            if failed {
-                hasAsked = false
-                pendingQuestion = nil
-                sessionManager.questionDeliveryFailed = false
-                sessionManager.showToast("Couldn't deliver — try again")
-            }
-        }
         .toast(Binding(
             get: { sessionManager.toast },
             set: { sessionManager.toast = $0 }

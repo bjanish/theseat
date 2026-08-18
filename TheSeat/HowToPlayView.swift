@@ -6,6 +6,12 @@ struct HowToPlayView: View {
 
     private let gold = Color(red: 0.85, green: 0.70, blue: 0.40)
 
+    init() {
+        let gold = UIColor(red: 0.85, green: 0.70, blue: 0.40, alpha: 1.0)
+        UIPageControl.appearance().currentPageIndicatorTintColor = gold
+        UIPageControl.appearance().pageIndicatorTintColor = gold.withAlphaComponent(0.3)
+    }
+
     var body: some View {
         ZStack {
             Color(white: 0.12)
@@ -18,7 +24,7 @@ struct HowToPlayView: View {
                     Button("Done") { dismiss() }
                         .foregroundStyle(gold)
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 16)
 
                 TabView(selection: $currentPage) {
@@ -45,8 +51,7 @@ struct HowToPlayView: View {
                 .shadow(color: gold.opacity(0.4), radius: 12, x: 0, y: 4)
 
             Text("Take the seat.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
 
             Text("Answer anything.")
@@ -64,13 +69,12 @@ struct HowToPlayView: View {
             Image(systemName: "person.3.fill")
                 .font(.system(size: 60))
                 .frame(height: 70)
-                .offset(y: 1)
                 .foregroundStyle(gold)
 
             Text("Friends connect anonymously.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
 
             Text("Questions appear.\nNobody knows who asked what.")
                 .font(.body)
@@ -88,12 +92,10 @@ struct HowToPlayView: View {
             Image(systemName: "hand.tap.fill")
                 .font(.system(size: 60))
                 .frame(height: 70)
-                .offset(y: -5)
                 .foregroundStyle(gold)
 
             Text("You pick what to answer.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
 
             Text("Swipe through questions.\nTap to choose one.")
@@ -112,12 +114,10 @@ struct HowToPlayView: View {
             Image(systemName: "person.line.dotted.person.fill")
                 .font(.system(size: 60))
                 .frame(height: 70)
-                .offset(y: -9)
                 .foregroundStyle(gold)
 
             Text("Pass the seat.")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
 
             Text("Choose who's next.")

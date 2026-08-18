@@ -65,6 +65,7 @@ final class SessionManager {
     @ObservationIgnored private var lastBrowseResults: Set<NWBrowser.Result> = []
     @ObservationIgnored private var wantsToJoin: Bool = false
     @ObservationIgnored private var keepAliveTimer: DispatchSourceTimer?
+    @ObservationIgnored private var hostRetryTimer: DispatchSourceTimer?
 
     private let audioQueue = DispatchQueue(label: "com.bjanish.theseat.audio")
     private let serviceType = "_theseat._tcp"
@@ -242,10 +243,6 @@ final class SessionManager {
 
     func joinSession() {
         wantsToJoin = true
-        // Bounce the ready listener to trigger a fresh Bonjour advertisement
-        // that the host's browser will see and attempt to connect to
-        stopReadyListener()
-        startReadyListener()
         #if DEBUG
         print("[PLAYER] Wants to join — waiting for host to connect")
         #endif
@@ -310,7 +307,7 @@ final class SessionManager {
     func resumeFromBackground() {
         lastLeftHostName = nil
         reconnectAttempts = 0
-        if role == .solo {
+        if role == .solo, UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
             startBrowser()
         }
     }
@@ -367,6 +364,20 @@ final class SessionManager {
 
         hb.start(queue: .main)
         hostBrowser = hb
+
+        // Retry connecting to discovered players every 3 seconds
+        // (handles the case where player taps Join after host already attempted)
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 3.0, repeating: 3.0)
+        timer.setEventHandler { [weak self] in
+            guard let self, self.role == .host else { return }
+            if let results = self.hostBrowser?.browseResults {
+                self.handleHostBrowseResults(results)
+            }
+        }
+        timer.resume()
+        hostRetryTimer = timer
+
         #if DEBUG
         print("[HOST-BROWSER] Started browsing for players")
         #endif
@@ -375,6 +386,8 @@ final class SessionManager {
     private func stopHostBrowser() {
         hostBrowser?.cancel()
         hostBrowser = nil
+        hostRetryTimer?.cancel()
+        hostRetryTimer = nil
     }
 
     private func handleHostBrowseResults(_ results: Set<NWBrowser.Result>) {
@@ -864,7 +877,7 @@ final class SessionManager {
         case .welcome(let name):
             hostName = name
             stopReadyListener()
-            showToast("\(name) is in The Seat")
+            showToast("\(name) is in The Seat", y: 0.3)
             #if DEBUG
             print("[PLAYER] Host name updated via welcome: \(name)")
             #endif
@@ -900,7 +913,7 @@ final class SessionManager {
             hostName = name
             hostRound += 1
             currentDisplayedQuestion = nil
-            showToast("\(name) is in The Seat")
+            showToast("\(name) is in The Seat", y: 0.3)
             #if DEBUG
             print("[PLAYER] New host: \(name)")
             #endif
