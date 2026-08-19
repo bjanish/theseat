@@ -41,7 +41,9 @@
 
 # Key Lessons (do NOT repeat)
 
-- All networking (listener, browser, connections) MUST run on background DispatchQueues — NOT `.main`. Running on `.main` causes the UI to freeze/become unresponsive. Callbacks hop to `@MainActor` via `Task` for state updates only.
+- PROBLEM-SOLVING MINDSET: When stuck for hours, stop patching symptoms and compare against working code (HighCard Flip). If the same phones work with one app and not another, the difference is in the code — find it. Don't accept "it's the environment" if a reference app proves otherwise. Don't add band-aids (ack timeouts, reconnect loops) before understanding the root cause. The answer is always simpler than the symptoms suggest. Brian will push you — trust his instincts, he's been right every time. There IS a solution. Always.
+- FIRST DEBUG STEP: If AWDL/peer-to-peer connections fail consistently (question won't deliver, `no mtu received`, `tcp_finalize_send error 49`), reboot the phone first. iOS's AWDL radio subsystem can get stuck. But if a reference app (HighCard) works on the same phone at the same time, it's NOT the radio — it's a code difference. Find it.
+- All networking (listener, browser, connections) runs on `.main` queue for this app. The old "must use background queue" rule was WRONG — it caused AWDL delivery failures. HighCard Flip runs on `.main` and works. The architecture is: host connects TO player (not the other way around). Keep-alive (.heartbeat every 2s) keeps AWDL warm.
 - Connection receive loop (`startReceiving`) must start AFTER a 0.3s delay once connected — gives the UI time to render the Player screen before the receive loop starts competing for main thread time. Without this delay, the Player screen is unresponsive for several seconds after joining.
 - `@Observable` networking properties that aren't `Hashable` (like NWConnection) must use `@ObservationIgnored` and `ObjectIdentifier` as dictionary keys.
 - `AVAudioSession.setActive()` blocks the main thread — must run in `Task.detached`, never in init or onAppear synchronously.
@@ -49,6 +51,7 @@
 - `GENERATE_INFOPLIST_FILE = YES` is unreliable for NSBonjourServices and NSLocalNetworkUsageDescription — use an explicit Info.plist file instead.
 - Simulator cannot do local network browsing (NoAuth error) — test networking on real devices only.
 - iOS first-time keyboard load is slow (~1-2s) after fresh install — this is an Apple issue, not a code bug.
+- `TextField("", text:, axis: .vertical)` breaks `.textInputAutocapitalization(.sentences)` — the first letter loses capitalization even on short input. Fix: manually force-capitalize in `.onChange`: `if let first = newValue.first, first.isLowercase { text = newValue.prefix(1).uppercased() + newValue.dropFirst() }`
 
 # Build Checklist Standard (All Projects)
 
