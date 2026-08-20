@@ -119,6 +119,7 @@ final class SessionManager {
     func startHosting() {
         peersWereNearbyAtHostStart = !nearbyReadyPeerNames.isEmpty
         role = .host
+        UIApplication.shared.isIdleTimerDisabled = true
         stopBrowser()
         stopReadyListener()
         startHostListener()
@@ -265,6 +266,7 @@ final class SessionManager {
         let leftHost = hostName
         lastLeftHostName = leftHost
         stopKeepAlive()
+        UIApplication.shared.isIdleTimerDisabled = false
         stopReadyListener()
         hostConnection?.cancel()
         hostConnection = nil
@@ -296,6 +298,7 @@ final class SessionManager {
             endSession()
         case .player:
             stopKeepAlive()
+            UIApplication.shared.isIdleTimerDisabled = false
             hostConnection?.cancel()
             hostConnection = nil
             role = .solo
@@ -504,6 +507,7 @@ final class SessionManager {
         isConnectingToHost = true
         hostConnection = connection
         role = .player
+        UIApplication.shared.isIdleTimerDisabled = true
         stopBrowser()
 
         connection.stateUpdateHandler = { [weak self] state in
@@ -607,6 +611,7 @@ final class SessionManager {
 
     private func handleHostDisconnect(_ connection: NWConnection) {
         let id = ObjectIdentifier(connection)
+        let hadName = connectionNames[id] != nil
         if let name = connectionNames[id] {
             connectedPeers.removeAll { $0 == name }
             showToast("\(name) left", y: 0.12)
@@ -623,6 +628,11 @@ final class SessionManager {
         connectionNames.removeValue(forKey: id)
         connectionDeviceIDs.removeValue(forKey: id)
         playerConnections.removeAll { $0 === connection }
+
+        // If all real players left, end the session automatically
+        if hadName && connectedPeers.isEmpty && role == .host {
+            endSession()
+        }
     }
 
     // MARK: - Private: Solo Browser (finds hosts + ready peers for UI)
@@ -746,6 +756,7 @@ final class SessionManager {
             stopKeepAlive()
             if role == .player {
                 role = .solo
+                UIApplication.shared.isIdleTimerDisabled = false
                 hostName = ""
                 currentDisplayedQuestion = nil
                 showToast("The Seat is empty", y: 0.04)
@@ -840,6 +851,7 @@ final class SessionManager {
             stopKeepAlive()
             if role == .player {
                 role = .solo
+                UIApplication.shared.isIdleTimerDisabled = false
                 hostName = ""
                 currentDisplayedQuestion = nil
                 showToast("The Seat is empty", y: 0.04)
@@ -928,6 +940,7 @@ final class SessionManager {
             hostConnection?.cancel()
             hostConnection = nil
             role = .solo
+            UIApplication.shared.isIdleTimerDisabled = false
             hostName = ""
             currentDisplayedQuestion = nil
             showToast("The Seat is empty", y: 0.04)
@@ -945,6 +958,7 @@ final class SessionManager {
 
     private func tearDown() {
         stopKeepAlive()
+        UIApplication.shared.isIdleTimerDisabled = false
         listener?.cancel()
         listener = nil
         stopReadyListener()
