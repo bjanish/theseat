@@ -174,7 +174,7 @@ struct HostView: View {
     }
 
     private var swipeGesture: some Gesture {
-        DragGesture()
+        DragGesture(minimumDistance: 20)
             .onChanged { value in
                 dragOffset = value.translation
             }

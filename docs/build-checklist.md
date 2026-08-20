@@ -233,3 +233,6 @@ Spec order = build order. Each section done-done before moving to the next.
 - [ ] App Store screenshots
 - [ ] App Store description and keywords
 - [ ] Review compliance (local network usage description)
+
+### Marketing Notes
+- Tagline: "Use while camping. No WiFi or cellular needed."
