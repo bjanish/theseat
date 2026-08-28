@@ -1,6 +1,6 @@
 # The Seat — Build Checklist
 
-**Release target: August 31, 2026**
+**Release target: September 7, 2026**
 
 Spec order = build order. Each section done-done before moving to the next.
 
@@ -114,9 +114,9 @@ Spec order = build order. Each section done-done before moving to the next.
 
 - [x] Question received (host): ping + light haptic
 - [x] Question sent (player): light haptic
-- [ ] Pass the Seat: medium haptic both sides
-- [ ] Player connects: connection sound + medium haptic
-- [ ] Question selected: light haptic
+- [x] Pass the Seat: medium haptic both sides
+- [x] Player connects: connection sound + medium haptic
+- [x] Question selected: light haptic
 - [x] Audio session: `.playback` + `.mixWithOthers`
 - [ ] Custom ping sound bundled (not card flip)
 - [x] Easter egg: heavy haptic on chair tap
@@ -133,7 +133,7 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] `.newHost(name:)` broadcast to all players
 - [x] Player input resets on new host (hostRound counter)
 - [x] Toast: "[Name] is in the seat" on seat pass
-- [ ] Medium haptic both sides
+- [x] Medium haptic both sides
 - [ ] Test pass on real devices
 
 ---
@@ -146,7 +146,7 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] Host resumes → session gone, back to solo
 - [x] "End Session" = same as backgrounding
 - [x] Player returns to solo on host disconnect
-- [ ] Idle timer disabled while active
+- [x] Idle timer disabled while active
 - [x] Test background/resume on real devices
 
 ---
@@ -156,7 +156,7 @@ Spec order = build order. Each section done-done before moving to the next.
 - [x] 3 slides: hero, flow, control
 - [x] TabView swipe pattern
 - [x] Local network permission mention
-- [ ] Polish slide content and visuals
+- [x] Polish slide content and visuals
 
 ---
 

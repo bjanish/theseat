@@ -66,6 +66,8 @@ final class SessionManager {
     @ObservationIgnored private var wantsToJoin: Bool = false
     @ObservationIgnored private var keepAliveTimer: DispatchSourceTimer?
     @ObservationIgnored private var hostRetryTimer: DispatchSourceTimer?
+    @ObservationIgnored private var readyRefreshTimer: DispatchSourceTimer?
+    @ObservationIgnored private var peerLastSeen: [String: Date] = [:]
 
     private let audioQueue = DispatchQueue(label: "com.bjanish.theseat.audio")
     private let serviceType = "_theseat._tcp"
@@ -218,6 +220,7 @@ final class SessionManager {
         let question = questionQueue[index]
         currentDisplayedQuestion = question
         sendToAllPlayers(.currentQuestion(text: question))
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 
     func skipQuestion(at index: Int) {
@@ -231,6 +234,7 @@ final class SessionManager {
         send(.passTheSeat(toName: name), to: connection)
         send(.youAreHost, to: connection)
         sendToAllPlayers(.newHost(name: name))
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         role = .player
         hostName = name
         questionQueue.removeAll()
@@ -295,7 +299,9 @@ final class SessionManager {
     func enterBackground() {
         switch role {
         case .host:
-            endSession()
+            sendToAllPlayers(.sessionEnd)
+            tearDown()
+            role = .solo
         case .player:
             stopKeepAlive()
             UIApplication.shared.isIdleTimerDisabled = false
@@ -407,11 +413,22 @@ final class SessionManager {
             if name.hasPrefix(selfPrefix) { continue }
 
             let parts = name.components(separatedBy: "-")
-            guard parts.count >= 3 else { continue }
+            guard parts.count >= 4 else { continue }
             let serviceState = parts.last
 
             // Only connect to -ready services (players waiting to join)
             guard serviceState == "ready" else { continue }
+
+            // Check timestamp freshness — don't connect to stale services
+            let timestampStr = parts[parts.count - 2]
+            if let ts = Int(timestampStr) {
+                let now = Int(Date().timeIntervalSince1970) % 100000
+                var age = now - ts
+                if age < 0 { age += 100000 }
+                if age > 12 { continue }
+            } else {
+                continue
+            }
 
             // Don't connect to players we already have
             let endpointDesc = "\(result.endpoint)"
@@ -420,7 +437,7 @@ final class SessionManager {
 
             // Connect TO this player
             #if DEBUG
-            let peerName = parts.dropLast(2).joined(separator: "-")
+            let peerName = parts.dropLast(3).joined(separator: "-")
             print("[HOST] Connecting to player: \(peerName) at \(result.endpoint)")
             #endif
             connectToPlayer(endpoint: result.endpoint)
@@ -461,7 +478,8 @@ final class SessionManager {
             let params = NWParameters.tcp
             params.includePeerToPeer = true
             let rl = try NWListener(using: params)
-            let serviceName = "\(playerName)-\(deviceID)-ready"
+            let ts = Int(Date().timeIntervalSince1970) % 100000
+            let serviceName = "\(playerName)-\(deviceID)-\(ts)-ready"
             rl.service = NWListener.Service(name: serviceName, type: serviceType)
 
             rl.newConnectionHandler = { [weak self] connection in
@@ -488,7 +506,16 @@ final class SessionManager {
     private func stopReadyListener() {
         readyListener?.cancel()
         readyListener = nil
+        peerLastSeen.removeAll()
         nearbyReadyPeerNames = []
+    }
+
+    /// Stops ready listener + refresh timer without clearing peer names (for lock screen)
+    func stopReadyListenerOnly() {
+        readyListener?.cancel()
+        readyListener = nil
+        readyRefreshTimer?.cancel()
+        readyRefreshTimer = nil
     }
 
     /// Player receives an incoming connection from the host
@@ -534,7 +561,7 @@ final class SessionManager {
         let endpointDesc = "\(connection.endpoint)"
         let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
         #if DEBUG
-        print("[HOST] New connection from: \(endpointDesc) (base: \(endpointBase))")
+        pr  int("[HOST] New connection from: \(endpointDesc) (base: \(endpointBase))")
         print("[HOST] Current endpoints: \(connectedEndpoints)")
         #endif
         guard !connectedEndpoints.contains(endpointBase) else {
@@ -668,6 +695,21 @@ final class SessionManager {
         browser.start(queue: .main)
         self.browser = browser
 
+        // Bounce the ready listener every 10s to refresh the timestamp
+        if readyRefreshTimer == nil {
+            let timer = DispatchSource.makeTimerSource(queue: .main)
+            timer.schedule(deadline: .now() + 15.0, repeating: 15.0)
+            timer.setEventHandler { [weak self] in
+                guard let self, self.role == .solo else { return }
+                // Bounce without clearing peer names — let browse results handle expiry
+                self.readyListener?.cancel()
+                self.readyListener = nil
+                self.startReadyListener()
+            }
+            timer.resume()
+            readyRefreshTimer = timer
+        }
+
         #if DEBUG
         print("[BROWSER] Started browsing")
         #endif
@@ -676,6 +718,9 @@ final class SessionManager {
     private func stopBrowser() {
         browser?.cancel()
         browser = nil
+        readyRefreshTimer?.cancel()
+        readyRefreshTimer = nil
+        peerLastSeen.removeAll()
         nearbyReadyPeerNames = []
     }
 
@@ -693,15 +738,25 @@ final class SessionManager {
             let parts = name.components(separatedBy: "-")
             guard parts.count >= 3 else { continue }
 
-            let peerName = parts.dropLast(2).joined(separator: "-")
             let serviceState = parts.last
 
             switch serviceState {
             case "ready":
-                if !peerName.isEmpty {
-                    readyPeerNames.append(peerName)
+                // Format: playerName-deviceID-timestamp-ready
+                guard parts.count >= 4 else { continue }
+                let peerName = parts.dropLast(3).joined(separator: "-")
+                let timestampStr = parts[parts.count - 2]
+                if !peerName.isEmpty, let ts = Int(timestampStr) {
+                    let now = Int(Date().timeIntervalSince1970) % 100000
+                    var age = now - ts
+                    if age < 0 { age += 100000 } // handle wraparound
+                    if age <= 12 {
+                        readyPeerNames.append(peerName)
+                    }
                 }
             case "host":
+                // Format: playerName-deviceID-host
+                let peerName = parts.dropLast(2).joined(separator: "-")
                 visibleHostServiceNames.insert(name)
                 if let leftHost = lastLeftHostName, name.contains(leftHost) { continue }
                 guard reconnectAttempts < 3, discoveredHost == nil else { continue }
@@ -711,7 +766,14 @@ final class SessionManager {
             }
         }
 
-        nearbyReadyPeerNames = readyPeerNames.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        // Update last-seen for fresh peers, expire those not seen in 25s
+        let now = Date()
+        for name in readyPeerNames {
+            peerLastSeen[name] = now
+        }
+        let validPeers = peerLastSeen.filter { now.timeIntervalSince($0.value) <= 25 }.map { $0.key }
+        peerLastSeen = peerLastSeen.filter { now.timeIntervalSince($0.value) <= 25 }
+        nearbyReadyPeerNames = validPeers.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 
         #if DEBUG
         let hostServices = visibleHostServiceNames.isEmpty ? "none" : visibleHostServiceNames.joined(separator: ", ")
@@ -852,11 +914,12 @@ final class SessionManager {
             if role == .player {
                 role = .solo
                 UIApplication.shared.isIdleTimerDisabled = false
+                let deadHost = hostName
                 hostName = ""
                 currentDisplayedQuestion = nil
                 showToast("The Seat is empty", y: 0.04)
                 reconnectAttempts = 0
-                lastLeftHostName = nil
+                lastLeftHostName = deadHost
                 startBrowser()
             }
         } else {
@@ -886,6 +949,7 @@ final class SessionManager {
             connectedPeers.append(finalName)
             showToast("\(finalName) joined", y: 0.12)
             send(.welcome(hostName: playerName), to: connection)
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
 
             #if DEBUG
             print("[HOST] Player joined: \(finalName) (device: \(incomingDeviceID))")
@@ -926,6 +990,7 @@ final class SessionManager {
             peersWereNearbyAtHostStart = true
             questionQueue.removeAll()
             currentDisplayedQuestion = nil
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
 
         case .newHost(let name):
             hostName = name
@@ -962,6 +1027,8 @@ final class SessionManager {
         listener?.cancel()
         listener = nil
         stopReadyListener()
+        readyRefreshTimer?.cancel()
+        readyRefreshTimer = nil
         stopHostBrowser()
         browser?.cancel()
         browser = nil

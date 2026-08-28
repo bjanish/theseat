@@ -23,6 +23,12 @@ struct TheSeatApp: App {
                         break
                     }
                 }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+                    // Stop ready listener on lock so timestamp freezes
+                    if sessionManager.role == .solo {
+                        sessionManager.stopReadyListenerOnly()
+                    }
+                }
         }
     }
 

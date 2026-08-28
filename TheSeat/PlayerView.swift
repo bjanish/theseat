@@ -51,7 +51,7 @@ struct PlayerView: View {
             pendingQuestion = nil
             questionText = ""
         }
-        .toast(Binding(
+        .toast(Binding( 
             get: { sessionManager.toast },
             set: { sessionManager.toast = $0 }
         ))
