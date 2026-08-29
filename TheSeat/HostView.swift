@@ -232,6 +232,12 @@ struct HostView: View {
 
                 Spacer()
 
+                // Dismiss hint — reinforces the host can answer more
+                Text("Tap to answer another")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.35))
+                    .padding(.bottom, 6)
+
                 // Watermark
                 Text("The Seat")
                     .font(.caption2)

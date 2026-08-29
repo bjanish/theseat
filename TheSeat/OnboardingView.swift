@@ -122,11 +122,12 @@ struct OnboardingView: View {
                 .frame(height: 70)
                 .foregroundStyle(gold)
 
-            Text("You pick what to answer.")
+            Text("Answer as many\nas you want.")
                 .font(.custom("Cinzel-Regular", size: 24))
                 .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
 
-            Text("Swipe through questions.\nTap to choose one.")
+            Text("Swipe through questions.\nTap one to answer, then pick another.")
                 .font(.body)
                 .foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)

@@ -561,7 +561,7 @@ final class SessionManager {
         let endpointDesc = "\(connection.endpoint)"
         let endpointBase = endpointDesc.components(separatedBy: ":").dropLast().joined(separator: ":")
         #if DEBUG
-        pr  int("[HOST] New connection from: \(endpointDesc) (base: \(endpointBase))")
+        print("[HOST] New connection from: \(endpointDesc) (base: \(endpointBase))")
         print("[HOST] Current endpoints: \(connectedEndpoints)")
         #endif
         guard !connectedEndpoints.contains(endpointBase) else {
