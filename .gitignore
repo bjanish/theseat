@@ -31,3 +31,5 @@ Carthage/Build
 # Playgrounds
 timeline.xctimeline
 playground.xcworkspace
+# Landing page (deployed from its own separate repo)
+theseat-site/

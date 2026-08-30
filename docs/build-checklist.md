@@ -229,6 +229,7 @@ Spec order = build order. Each section done-done before moving to the next.
 
 ## 14. Pre-Submission
 
+- [x] Landing page live at theseat.us (GitHub Pages, HTTPS)
 - [ ] Create privacy policy (hosted at bjanish.com/privacy)
 - [ ] App Store screenshots
 - [ ] App Store description and keywords

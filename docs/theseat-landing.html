@@ -694,8 +694,19 @@
         </p>
     </footer>
 
+    <!-- Hidden page view counter (bottom-left, background-colored so invisible; select to read) -->
+    <div id="view-count" style="position: fixed; bottom: 10px; left: 10px; color: #0a0a0a; font-size: 11px; user-select: all; z-index: 99;"></div>
+
     <!-- SCROLL ANIMATIONS + QUESTION ROTATION -->
     <script>
+        // Page view counter
+        fetch('https://countapi.mileshilliard.com/api/v1/hit/theseat_visits')
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                document.getElementById('view-count').textContent = data.value || '0';
+            })
+            .catch(function () { });
+
         // Fade-in on scroll
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
